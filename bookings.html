@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ví</title>
+    <link rel="shortcut icon" href="./images/logo.png" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="bookings">
+    <header>
+        <div class="logo"><img src="./images/logo.png" alt="StudyHub logo" /><h2>Study<span class="danger">Hub</span></h2></div>
+        <div class="navbar">
+            <a href="index.html"><span class="material-icons-sharp">home</span><h3>Home</h3></a>
+            <a href="search.html"><span class="material-icons-sharp">search</span><h3>Tìm kiếm/Lọc</h3></a>
+            <a href="tutor.html?id=1"><span class="material-icons-sharp">person</span><h3>Hồ sơ Gia sư</h3></a>
+            <a href="bookings.html" class="active"><span class="material-icons-sharp">account_balance_wallet</span><h3>Ví</h3></a>
+            <a href="#" id="logout-link"><span class="material-icons-sharp">logout</span><h3>Logout</h3></a>
+        </div>
+        <div class="theme-toggler"><span class="material-icons-sharp active">light_mode</span><span class="material-icons-sharp">dark_mode</span></div>
+    </header>
+    <main class="demo-page">
+        <section class="wallet-card">
+            <h1>Study-Wallet</h1>
+            <p>Số dư hiện tại: <strong id="wallet-balance">0đ</strong></p>
+            <div class="wallet-topup">
+                <input id="topup-amount" type="number" min="1000" step="1000" placeholder="Nhập số tiền nạp" />
+                <button id="topup-btn" class="btn-primary" type="button">Nạp ví</button>
+            </div>
+            <div class="wallet-topup" style="margin-top:.75rem;">
+                <input id="withdraw-amount" type="number" min="1000" step="1000" placeholder="Nhập số tiền rút" />
+                <button id="withdraw-btn" class="btn-secondary" type="button">Rút ví</button>
+            </div>
+        </section>
+        <section class="booking-columns">
+            <div>
+                <h1>Lịch hẹn sắp tới</h1>
+                <div id="upcoming-bookings" class="booking-list"></div>
+            </div>
+            <div>
+                <h1>Lịch sử học tập</h1>
+                <div id="booking-history" class="booking-list"></div>
+            </div>
+        </section>
+        <section>
+            <h1>Giao dịch ví gần đây</h1>
+            <div id="wallet-transactions" class="booking-list"></div>
+        </section>
+    </main>
+    <script src="app.js"></script>
+    <script src="tutor-data.js"></script>
+    <script src="tutor-demo.js"></script>
+</body>
+</html>

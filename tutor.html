@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hồ sơ gia sư</title>
+    <link rel="shortcut icon" href="./images/logo.png" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="tutor">
+    <header>
+        <div class="logo"><img src="./images/logo.png" alt="StudyHub logo" /><h2>Study<span class="danger">Hub</span></h2></div>
+        <div class="navbar">
+            <a href="index.html"><span class="material-icons-sharp">home</span><h3>Home</h3></a>
+            <a href="search.html"><span class="material-icons-sharp">search</span><h3>Tìm kiếm/Lọc</h3></a>
+            <a href="tutor.html?id=1" class="active"><span class="material-icons-sharp">person</span><h3>Hồ sơ Gia sư</h3></a>
+            <a href="bookings.html"><span class="material-icons-sharp">account_balance_wallet</span><h3>Ví</h3></a>
+            <a href="#" id="logout-link"><span class="material-icons-sharp">logout</span><h3>Logout</h3></a>
+        </div>
+        <div class="theme-toggler"><span class="material-icons-sharp active">light_mode</span><span class="material-icons-sharp">dark_mode</span></div>
+    </header>
+    <main class="demo-page">
+        <section id="tutor-profile" class="tutor-profile"></section>
+        <div class="booking-bar">
+            <button id="book-30" class="btn-primary">Đặt nhanh 30 phút</button>
+            <button id="book-45" class="btn-secondary">Đặt nhanh 45 phút</button>
+        </div>
+    </main>
+    <script src="app.js"></script>
+    <script src="tutor-data.js"></script>
+    <script src="tutor-demo.js"></script>
+</body>
+</html>

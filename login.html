@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - StudyHub</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-container{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--color-background);padding:1rem;}
+        .login-card{width:min(420px,100%);background:var(--color-white);padding:2rem;border-radius:1rem;box-shadow:var(--box-shadow);}
+        .auth-tabs{display:flex;gap:.5rem;margin:1rem 0 1.5rem;}
+        .auth-tabs button{flex:1;padding:.7rem;border:none;border-radius:.7rem;background:var(--color-light);cursor:pointer;font-weight:600;}
+        .auth-tabs button.active{background:var(--color-primary);color:#fff;}
+        .form-group{margin-bottom:1rem;display:grid;gap:.4rem;}
+        .form-group input{width:100%;padding:.8rem;border-radius:.6rem;border:1px solid var(--color-light);background:var(--color-background);}
+        .btn{width:100%;display:inline-block;padding:.8rem 1rem;background:var(--color-primary);color:#fff;border-radius:.6rem;border:none;cursor:pointer;font-weight:600;}
+        .error{color:var(--color-danger);font-size:.85rem;margin-top:.5rem;display:none;}
+        .hint{font-size:.82rem;color:var(--color-info);margin-top:.8rem;}
+        .hidden{display:none;}
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <h2 id="authTitle">Sign in</h2>
+            <div class="auth-tabs">
+                <button type="button" id="tabSignIn" class="active">Sign in</button>
+                <button type="button" id="tabSignUp">Sign up</button>
+            </div>
+
+            <form id="signInForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input id="username" type="text" placeholder="Enter username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" placeholder="Enter password">
+                </div>
+                <button type="submit" class="btn">Login</button>
+                <p class="error" id="loginError"></p>
+            </form>
+
+            <form id="signUpForm" class="hidden">
+                <div class="form-group">
+                    <label for="newUsername">Username</label>
+                    <input id="newUsername" type="text" placeholder="Create username">
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Password</label>
+                    <input id="newPassword" type="password" placeholder="Create password">
+                </div>
+                <button type="submit" class="btn">Create account</button>
+                <p class="error" id="signupError"></p>
+            </form>
+
+            <p class="hint">Demo account: <b>student</b> / <b>password123</b></p>
+        </div>
+    </div>
+
+    <script src="login.js"></script>
+</body>
+</html>
