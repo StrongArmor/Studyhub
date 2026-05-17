@@ -105,6 +105,30 @@ export function TutorModal() {
               <span className="info-value capitalize">{t.timeSlot === 'morning' ? 'Sáng' : t.timeSlot === 'afternoon' ? 'Chiều' : 'Tối'}</span>
             </div>
           </div>
+
+          <div className="info-block">
+            <h3>Khung giờ trống</h3>
+            <div className="available-slots">
+              {t.availableSlots && t.availableSlots.length > 0 ? (
+                <div className="slots-grid">
+                  {t.availableSlots.map((slot) => {
+                    const [date, time] = slot.split('_');
+                    const dateObj = new Date(date);
+                    const dayName = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][dateObj.getDay()];
+                    const displayDate = `${dayName} ${dateObj.getDate()}/${dateObj.getMonth() + 1}`;
+                    return (
+                      <div key={slot} className="slot-badge">
+                        <div className="slot-date">{displayDate}</div>
+                        <div className="slot-time">{time}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="no-slots">Hiện tại không có khung giờ trống</div>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="tutor-modal-footer">

@@ -340,4 +340,13 @@ a { cursor: pointer; text-decoration: none; }
 .info-value { font-size: 15px; font-weight: 700; color: #212529; }
 .tutor-modal-footer { display: flex; gap: 12px; }
 .tutor-modal-footer .btn { flex: 1; }
+.available-slots { margin-top: 8px; }
+.slots-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.slot-badge { background: #EEF2FF; border: 1.5px solid #3B5BDB; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.slot-badge:hover { background: #3B5BDB; color: #fff; }
+.slot-date { font-size: 11px; color: #adb5bd; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; }
+.slot-badge:hover .slot-date { color: rgba(255,255,255,.7); }
+.slot-time { font-size: 14px; font-weight: 700; color: #3B5BDB; }
+.slot-badge:hover .slot-time { color: #fff; }
+.no-slots { font-size: 13px; color: #adb5bd; text-align: center; padding: 14px; }
 
