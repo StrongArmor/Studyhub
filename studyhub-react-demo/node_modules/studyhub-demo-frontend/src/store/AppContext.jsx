@@ -63,8 +63,19 @@ const initialState = {
       { id: 3, label: 'Rút tiền về ngân hàng', amount: 1000000, type: 'out', time: '2 ngày trước' }
     ]
   },
-  withdraw: { amount: '1000000', step: 'select', otp: ['','','','','',''], bank: 'VCB **** 2891' },
+   withdraw: { amount: '1000000', step: 'select', otp: ['','','','','',''], bank: 'VCB **** 2891' },
   tutorForm: { name: '', email: '', phone: '', subjects: [], education: '', experience: '', price: '', bio: '' },
+  tutorProfile: {
+    bio: 'Tôi là một gia sư tận tâm với 8 năm kinh nghiệm giảng dạy. Chuyên ôn thi THPT Quốc gia và luyện thi học sinh giỏi.',
+    skills: ['Toán học cơ bản', 'Toán học nâng cao', 'Ôn thi THPT', 'Luyện thi học sinh giỏi'],
+    certificates: [],
+    documents: [],
+    coverImage: '',
+    totalHours: 856,
+    totalStudents: 127,
+    rating: 4.9,
+    scheduleSlots: []
+  },
   applications: [],
   session: { tutor: 'Nguyễn Minh Anh', student: 'Học viên Demo', subject: 'Toán học', room: 'https://meet.google.com/vvk-fuco-zpo', time: '19:00 - 19:45' },
   bookingStage: 'detail',
@@ -104,8 +115,13 @@ function reducer(state, action) {
     case 'SET_OTP_TIMER': return { ...state, otpTimer: action.payload };
     case 'SET_HERO_SEARCH': return { ...state, heroSearch: action.payload };
     case 'SET_BOOKING_STAGE': return { ...state, bookingStage: action.payload };
-    case 'SET_ADMIN': return { ...state, admin: { ...state.admin, ...action.payload } };
+     case 'SET_ADMIN': return { ...state, admin: { ...state.admin, ...action.payload } };
     case 'SET_TUTOR_MODAL': return { ...state, tutorModal: { ...state.tutorModal, ...action.payload } };
+    case 'SET_TUTOR_PROFILE': return { ...state, tutorProfile: { ...state.tutorProfile, ...action.payload } };
+    case 'ADD_CERTIFICATE': return { ...state, tutorProfile: { ...state.tutorProfile, certificates: [...state.tutorProfile.certificates, action.payload] } };
+    case 'ADD_DOCUMENT': return { ...state, tutorProfile: { ...state.tutorProfile, documents: [...state.tutorProfile.documents, action.payload] } };
+    case 'SET_SCHEDULE_SLOT': return { ...state, tutorProfile: { ...state.tutorProfile, scheduleSlots: [...state.tutorProfile.scheduleSlots, action.payload] } };
+    case 'REMOVE_SCHEDULE_SLOT': return { ...state, tutorProfile: { ...state.tutorProfile, scheduleSlots: state.tutorProfile.scheduleSlots.filter(s => s.id !== action.payload) } };
     default: return state;
   }
 }

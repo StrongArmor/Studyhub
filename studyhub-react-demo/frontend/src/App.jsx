@@ -3,6 +3,7 @@ import { Toast, EmailModal, BookingModal, ReviewModal, ReportModal, TutorModal }
 import { HomePage } from './components/home';
 import { RoleSelectPage, LoginPage, RegisterPage, OTPPage } from './components/auth';
 import { TutorListPage } from './components/tutors';
+import { TutorProfilePage } from './components/tutor-profile';
 import { StudentDashboard } from './components/dashboard';
 import { WalletPage, WithdrawPage } from './components/wallet';
 import { AdminPanel } from './components/admin';
@@ -19,7 +20,8 @@ function Router() {
     case 'login-admin': return <LoginPage role="admin" />;
     case 'register': return <RegisterPage />;
     case 'otp': return <OTPPage />;
-    case 'tutors': return <TutorListPage />;
+     case 'tutors': return <TutorListPage />;
+    case 'tutor-profile': return requireAuth(<TutorProfilePage />);
     case 'dashboard': return requireAuth(<StudentDashboard />);
     case 'wallet': return requireAuth(<WalletPage />);
     case 'withdraw': return requireAuth(<WithdrawPage />);
