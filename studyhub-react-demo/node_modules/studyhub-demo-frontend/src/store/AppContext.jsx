@@ -31,6 +31,7 @@ const initialState = {
   toast: { msg: '', type: '' },
   emailModal: { open: false, msg: '' },
   tutors: [
+   { id: 0, name: 'Gia sư Demo', initials: 'GD', color: '#FF6B6B', rating: 4.9, reviews: 127, subjects: ['Toán học', 'Vật lý'], desc: 'Gia sư tận tâm với 8 năm kinh nghiệm. Chuyên ôn thi THPT Quốc gia và luyện thi học sinh giỏi.', sessions: 856, price: 150000, timeSlot: 'evening', status: 'Online', availableSlots: ['2026-05-08_19:00', '2026-05-08_20:00', '2026-05-09_19:00', '2026-05-10_20:00'], active: true },
    { id: 1, name: 'Nguyễn Minh Anh', initials: 'NMA', color: '#3B5BDB', rating: 4.9, reviews: 127, subjects: ['Toán học', 'Vật lý'], desc: 'Giáo viên Toán - Lý với 8 năm kinh nghiệm. Chuyên ôn thi THPT Quốc gia và luyện thi.', sessions: 856, price: 150000, timeSlot: 'evening', status: 'Online', availableSlots: ['2026-05-08_19:00', '2026-05-08_20:00', '2026-05-09_19:00', '2026-05-10_20:00'] },
    { id: 2, name: 'Trần Hải Đăng', initials: 'THĐ', color: '#7C3AED', rating: 5.0, reviews: 93, subjects: ['Tiếng Anh', 'IELTS'], desc: 'IELTS 8.5 - Chuyên luyện thi IELTS Speaking & Writing. Phương pháp học tập trung, hiệu quả.', sessions: 542, price: 200000, timeSlot: 'evening', status: 'Online', availableSlots: ['2026-05-08_20:00', '2026-05-09_20:00', '2026-05-10_20:00', '2026-05-11_19:00'] },
    { id: 3, name: 'Lê Thu Hà', initials: 'LTH', color: '#E64980', rating: 4.8, reviews: 68, subjects: ['Hóa học', 'Sinh học'], desc: 'Giảng viên Hóa - Sinh, chuyên ôn thi THPT và luyện thi Y Dược.', sessions: 423, price: 120000, timeSlot: 'morning', status: 'Offline', availableSlots: ['2026-05-08_09:00', '2026-05-09_10:00', '2026-05-10_09:00', '2026-05-11_10:00'] },
@@ -74,7 +75,9 @@ const initialState = {
     totalHours: 856,
     totalStudents: 127,
     rating: 4.9,
-    scheduleSlots: []
+    scheduleSlots: [],
+    selectedSlots: [],
+    declineCount: 0
   },
   applications: [],
   session: { tutor: 'Nguyễn Minh Anh', student: 'Học viên Demo', subject: 'Toán học', room: 'https://meet.google.com/vvk-fuco-zpo', time: '19:00 - 19:45' },
@@ -120,8 +123,21 @@ function reducer(state, action) {
     case 'SET_TUTOR_PROFILE': return { ...state, tutorProfile: { ...state.tutorProfile, ...action.payload } };
     case 'ADD_CERTIFICATE': return { ...state, tutorProfile: { ...state.tutorProfile, certificates: [...state.tutorProfile.certificates, action.payload] } };
     case 'ADD_DOCUMENT': return { ...state, tutorProfile: { ...state.tutorProfile, documents: [...state.tutorProfile.documents, action.payload] } };
-    case 'SET_SCHEDULE_SLOT': return { ...state, tutorProfile: { ...state.tutorProfile, scheduleSlots: [...state.tutorProfile.scheduleSlots, action.payload] } };
+    case 'SET_SCHEDULE_SLOT': return { 
+      ...state, 
+      tutorProfile: { 
+        ...state.tutorProfile, 
+        scheduleSlots: [...state.tutorProfile.scheduleSlots, action.payload] 
+      },
+      tutors: state.tutors.map(t => 
+        t.id === 0 
+          ? { ...t, availableSlots: [...(t.availableSlots || []), action.payload.id] }
+          : t
+      )
+    };
     case 'REMOVE_SCHEDULE_SLOT': return { ...state, tutorProfile: { ...state.tutorProfile, scheduleSlots: state.tutorProfile.scheduleSlots.filter(s => s.id !== action.payload) } };
+    case 'SET_SELECTED_SLOTS': return { ...state, tutorProfile: { ...state.tutorProfile, selectedSlots: action.payload } };
+    case 'SET_DECLINE_COUNT': return { ...state, tutorProfile: { ...state.tutorProfile, declineCount: action.payload } };
     default: return state;
   }
 }

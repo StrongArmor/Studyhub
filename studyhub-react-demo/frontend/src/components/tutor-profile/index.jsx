@@ -7,10 +7,11 @@ export function TutorProfilePage() {
   const { state, dispatch } = useApp();
   const [isEditing, setIsEditing] = useState(false);
   const [editBio, setEditBio] = useState(state.tutorProfile?.bio || '');
-  const [selectedSlots, setSelectedSlots] = useState(state.tutorProfile?.selectedSlots || []);
 
   const profile = state.tutorProfile;
   const user = state.currentUser;
+  const selectedSlots = profile?.selectedSlots || [];
+
 
   const handleAddCertificate = (e) => {
     const file = e.target.files?.[0];
@@ -99,28 +100,44 @@ export function TutorProfilePage() {
 
   const handleSlotClick = (slot) => {
     const exists = selectedSlots.some(s => s.id === slot.id);
+    let newSlots;
     if (exists) {
-      // toggle off
-      setSelectedSlots(selectedSlots.filter(s => s.id !== slot.id));
+      newSlots = selectedSlots.filter(s => s.id !== slot.id);
     } else {
-      // add new selected slot object
-      setSelectedSlots([...selectedSlots, { id: slot.id, time: slot.time, date: slot.date, display: slot.display, dayName: slot.dayName }]);
+      newSlots = [...selectedSlots, { id: slot.id, time: slot.time, date: slot.date, display: slot.display, dayName: slot.dayName }];
     }
+    dispatch({ type: 'SET_SELECTED_SLOTS', payload: newSlots });
   };
 
   const handleRemoveSlot = (id) => {
-    setSelectedSlots(selectedSlots.filter(s => s.id !== id));
+    const newSlots = selectedSlots.filter(s => s.id !== id);
+    dispatch({ type: 'SET_SELECTED_SLOTS', payload: newSlots });
   };
 
   const handleConfirmSlots = () => {
     if (selectedSlots.length > 0) {
       selectedSlots.forEach(slot => {
-        dispatch({ type: 'SET_SCHEDULE_SLOT', payload: { id: slot.id } });
+        dispatch({ 
+          type: 'SET_SCHEDULE_SLOT', 
+          payload: { 
+            id: slot.id, 
+            time: slot.time, 
+            date: slot.date, 
+            display: slot.display, 
+            dayName: slot.dayName 
+          } 
+        });
       });
-      setSelectedSlots([]);
+      dispatch({ type: 'SET_SELECTED_SLOTS', payload: [] });
       alert(`Đã đặt ${selectedSlots.length} ca học!`);
     }
   };
+
+  // Mock virtual students lesson requests
+  const virtualStudents = [
+    { id: 1, name: 'Nguyễn Văn A', subject: 'Toán học', requestedTime: '2026-05-20 19:00', avatar: 'NVA', color: '#3B5BDB' },
+    { id: 2, name: 'Lê Thị B', subject: 'Vật lý', requestedTime: '2026-05-21 20:00', avatar: 'LTB', color: '#7C3AED' }
+  ];
 
   return (
     <>
@@ -235,10 +252,55 @@ export function TutorProfilePage() {
               </div>
             ) : (
               <div className="empty-placeholder">Chưa upload bằng cấp nào</div>
-            )}
-          </div>
+             )}
+             </div>
 
-          {/* Schedule Section */}
+            {/* Virtual Students Section */}
+            <div className="profile-section">
+              <div className="section-header">
+                <h2>Yêu cầu từ học viên</h2>
+              </div>
+              <div className="virtual-students-list">
+                {virtualStudents.map((student) => (
+                  <div key={student.id} className="student-request-card">
+                    <div className="student-info">
+                      <div className="student-avatar" style={{ background: student.color }}>
+                        {student.avatar}
+                      </div>
+                      <div className="student-details">
+                        <div className="student-name">{student.name}</div>
+                        <div className="student-subject">{student.subject}</div>
+                        <div className="student-time">🕐 {student.requestedTime}</div>
+                      </div>
+                    </div>
+                    <div className="student-actions">
+                      <button 
+                        className="btn btn-primary btn-sm"
+                        onClick={() => {
+                          alert(`Đã xác nhận bài học với ${student.name}!`);
+                        }}
+                      >
+                        Xác nhận
+                      </button>
+                      <button 
+                        className="btn btn-outline btn-sm"
+                        onClick={() => {
+                          const newCount = (profile?.declineCount || 0) + 1;
+                          dispatch({ type: 'SET_DECLINE_COUNT', payload: newCount });
+                          if (newCount === 3) {
+                            alert('⚠️ Bạn đã từ chối 3 lần. Vui lòng điều chỉnh lại khung giờ dạy phù hợp để đảm bảo chất lượng hệ thống.');
+                          }
+                        }}
+                      >
+                        Từ chối dạy
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+             </div>
+
+            {/* Schedule Section */}
           <div className="profile-section">
             <div className="section-header">
               <h2>Lịch dạy học</h2>
