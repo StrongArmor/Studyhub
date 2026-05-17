@@ -1,0 +1,16 @@
+import { useApp } from '../../store/AppContext';
+import { Navbar, Footer } from '../common';
+import { useBooking } from '../../hooks';
+
+function BookingCard({ tutorName, subject, date, time, duration, price, status, initials, color, action }) { return <div className="booking-card"><div className="booking-top"><div className="booking-tutor"><div className="booking-avatar" style={{ background: color }}>{initials}</div><div><div className="booking-info"><h3>{tutorName}</h3></div><div className="booking-subject">{subject}</div><div className="booking-meta"><span className="booking-meta-item">📅 {date}</span><span className="booking-meta-item">🕐 {time} ({duration} phút)</span><span className="booking-price">{price.toLocaleString()}đ</span></div></div></div><span className={`status-badge ${status === 'Đã xác nhận' ? 'status-confirmed' : 'status-completed'}`}>{status}</span></div><div className="booking-actions">{action}</div></div>; }
+
+export function StudentDashboard() {
+  const { state, navigate } = useApp();
+  const { cancelBooking, openReviewModal, openReportModal } = useBooking();
+  const { wallet, bookings } = state;
+  const upcoming = bookings.filter((b) => b.status === 'confirmed');
+  const completed = bookings.filter((b) => b.status === 'completed');
+  const joinMeet = () => window.open('https://meet.google.com/vvk-fuco-zpo', '_blank', 'noopener,noreferrer');
+
+  return <><Navbar active="role-select" /><div className="dashboard-container"><div className="dashboard-header"><h1>Lịch học của tôi</h1><p>Quản lý các buổi học, ví tiền và đánh giá gia sư</p></div><div className="quick-grid small"><div className="quick-card" onClick={() => navigate('wallet')}><div className="quick-icon">👛</div><strong>Ví của tôi</strong><p>{wallet.balance.toLocaleString()}đ khả dụng</p></div><div className="quick-card" onClick={() => navigate('booking-center')}><div className="quick-icon">🎥</div><strong>Phòng học</strong><p>Chi tiết ca học và vào lớp</p></div></div><div className="tabs"><div className="tab-item active">Sắp diễn ra ({upcoming.length})</div><div className="tab-item">Đã hoàn thành ({completed.length})</div></div><div id="tab-upcoming">{upcoming.map((b) => <BookingCard key={b.id} tutorName={b.tutorName} subject={b.subject} date={b.date} time={b.time} duration={b.duration} price={b.price} status="Đã xác nhận" initials={b.tutorInitials} color={b.tutorColor} action={<><button className="btn btn-primary btn-sm" onClick={joinMeet}>Tham gia buổi học</button><button className="btn btn-outline btn-sm" onClick={() => cancelBooking(b.id)}>Hủy buổi học</button></>} />)}</div><div className="tabs" style={{ marginTop: 24 }}><div className="tab-item active">Đã hoàn thành ({completed.length})</div></div><div id="tab-completed">{completed.map((b) => <BookingCard key={b.id} tutorName={b.tutorName} subject={b.subject} date={b.date} time={b.time} duration={b.duration} price={b.price} status="Đã hoàn thành" initials={b.tutorInitials} color={b.tutorColor} action={<><button className="btn btn-primary btn-sm" onClick={() => openReviewModal(b.tutorName)}>Đánh giá</button><button className="btn btn-outline btn-sm" onClick={() => alert('Chuyển đến trang đặt lịch...')}>Đặt lại</button><button className="btn btn-danger btn-sm" onClick={() => openReportModal(b)}>Báo cáo</button></>} />)}</div></div><Footer /></>;
+}
