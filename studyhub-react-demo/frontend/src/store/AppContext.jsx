@@ -123,18 +123,23 @@ function reducer(state, action) {
     case 'SET_TUTOR_PROFILE': return { ...state, tutorProfile: { ...state.tutorProfile, ...action.payload } };
     case 'ADD_CERTIFICATE': return { ...state, tutorProfile: { ...state.tutorProfile, certificates: [...state.tutorProfile.certificates, action.payload] } };
     case 'ADD_DOCUMENT': return { ...state, tutorProfile: { ...state.tutorProfile, documents: [...state.tutorProfile.documents, action.payload] } };
-    case 'SET_SCHEDULE_SLOT': return { 
-      ...state, 
-      tutorProfile: { 
-        ...state.tutorProfile, 
-        scheduleSlots: [...state.tutorProfile.scheduleSlots, action.payload] 
-      },
-      tutors: state.tutors.map(t => 
-        t.id === 0 
-          ? { ...t, availableSlots: [...(t.availableSlots || []), action.payload.id] }
-          : t
-      )
-    };
+      case 'SET_SCHEDULE_SLOTS_BULK': {
+          const existingIds = new Set(state.tutorProfile.scheduleSlots.map(s => s.id));
+          const uniqueNew = action.payload.filter(s => !existingIds.has(s.id));
+          return {
+              ...state,
+              tutorProfile: {
+                  ...state.tutorProfile,
+                  scheduleSlots: [...state.tutorProfile.scheduleSlots, ...uniqueNew],
+                  selectedSlots: [],
+              },
+              tutors: state.tutors.map(t =>
+                  t.id === (state.currentUser?.id ?? 0)
+                      ? { ...t, availableSlots: [...(t.availableSlots || []), ...uniqueNew.map(s => s.id)] }
+                      : t
+              )
+          };
+      }
     case 'REMOVE_SCHEDULE_SLOT': return { ...state, tutorProfile: { ...state.tutorProfile, scheduleSlots: state.tutorProfile.scheduleSlots.filter(s => s.id !== action.payload) } };
     case 'SET_SELECTED_SLOTS': return { ...state, tutorProfile: { ...state.tutorProfile, selectedSlots: action.payload } };
     case 'SET_DECLINE_COUNT': return { ...state, tutorProfile: { ...state.tutorProfile, declineCount: action.payload } };

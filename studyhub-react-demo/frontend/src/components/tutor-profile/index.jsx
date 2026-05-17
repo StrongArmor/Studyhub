@@ -109,29 +109,23 @@ export function TutorProfilePage() {
     dispatch({ type: 'SET_SELECTED_SLOTS', payload: newSlots });
   };
 
-  const handleRemoveSlot = (id) => {
-    const newSlots = selectedSlots.filter(s => s.id !== id);
-    dispatch({ type: 'SET_SELECTED_SLOTS', payload: newSlots });
-  };
+    const handleRemoveSlot = (id) => {
+        dispatch({ type: 'REMOVE_SCHEDULE_SLOT', payload: id });
+    };
 
-  const handleConfirmSlots = () => {
-    if (selectedSlots.length > 0) {
-      selectedSlots.forEach(slot => {
-        dispatch({ 
-          type: 'SET_SCHEDULE_SLOT', 
-          payload: { 
-            id: slot.id, 
-            time: slot.time, 
-            date: slot.date, 
-            display: slot.display, 
-            dayName: slot.dayName 
-          } 
+    const handleConfirmSlots = () => {
+        if (selectedSlots.length === 0) return;
+        dispatch({
+            type: 'SET_SCHEDULE_SLOTS_BULK',
+            payload: selectedSlots.map(slot => ({
+                id: slot.id,
+                time: slot.time,
+                date: slot.date,
+                display: slot.display,
+                dayName: slot.dayName,
+            })),
         });
-      });
-      dispatch({ type: 'SET_SELECTED_SLOTS', payload: [] });
-      alert(`Đã đặt ${selectedSlots.length} ca học!`);
-    }
-  };
+    };
 
   // Mock virtual students lesson requests
   const virtualStudents = [
@@ -306,13 +300,13 @@ export function TutorProfilePage() {
               <h2>Lịch dạy học</h2>
             </div>
             <div className="schedule-info">
-              <p>Chọn các khung giờ trống để các học viên có thể đặt lịch. Bạn có thể chọn từ 1-2 ca trên một lần.</p>
+              <p>Chọn các khung giờ trống để các học viên có thể đặt lịch.</p>
             </div>
 
             <div className="selected-slots-container">
-              {selectedSlots && selectedSlots.length > 0 ? (
-                <div className="slot-tags">
-                  {selectedSlots.map((s) => {
+                          {profile.scheduleSlots && profile.scheduleSlots.length > 0 ? (
+                              <div className="slot-tags">
+                                  {profile.scheduleSlots.map((s) => {
                     const d = new Date(s.date);
                     const dateStr = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
                     return (
