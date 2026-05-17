@@ -243,11 +243,46 @@
   font-weight: 500;
 }
 
-.schedule-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
+.selected-slots-container {
+  margin-bottom: 18px;
+  padding: 12px;
+  background: #fff;
+  border: 1.5px solid #e9ecef;
+  border-radius: 10px;
+}
+
+.slot-tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.slot-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #EEF2FF;
+  border: 1px solid #3B5BDB;
+  color: #3B5BDB;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.slot-text { font-size: 13px; }
+
+.slot-remove {
+  background: transparent;
+  border: none;
+  color: #FA5252;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.slot-placeholder {
+  color: #868e96;
+  font-size: 14px;
+  padding: 8px 4px;
 }
 
 .stat-box {

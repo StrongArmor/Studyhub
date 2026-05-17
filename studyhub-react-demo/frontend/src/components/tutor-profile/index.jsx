@@ -7,7 +7,7 @@ export function TutorProfilePage() {
   const { state, dispatch } = useApp();
   const [isEditing, setIsEditing] = useState(false);
   const [editBio, setEditBio] = useState(state.tutorProfile?.bio || '');
-  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [selectedSlots, setSelectedSlots] = useState(state.tutorProfile?.selectedSlots || []);
 
   const profile = state.tutorProfile;
   const user = state.currentUser;
@@ -97,29 +97,30 @@ export function TutorProfilePage() {
     slotsByDate[slot.date].push(slot);
   });
 
-  const handleSlotClick = (slotId) => {
-    if (selectedSlot === slotId) {
-      // Click on selected slot to deselect/remove
-      setSelectedSlot(null);
+  const handleSlotClick = (slot) => {
+    const exists = selectedSlots.some(s => s.id === slot.id);
+    if (exists) {
+      // toggle off
+      setSelectedSlots(selectedSlots.filter(s => s.id !== slot.id));
     } else {
-      // Select a new slot
-      setSelectedSlot(slotId);
+      // add new selected slot object
+      setSelectedSlots([...selectedSlots, { id: slot.id, time: slot.time, date: slot.date, display: slot.display, dayName: slot.dayName }]);
     }
   };
 
-  const handleConfirmSlot = () => {
-    if (selectedSlot) {
-      dispatch({
-        type: 'SET_SCHEDULE_SLOT',
-        payload: { id: selectedSlot }
+  const handleRemoveSlot = (id) => {
+    setSelectedSlots(selectedSlots.filter(s => s.id !== id));
+  };
+
+  const handleConfirmSlots = () => {
+    if (selectedSlots.length > 0) {
+      selectedSlots.forEach(slot => {
+        dispatch({ type: 'SET_SCHEDULE_SLOT', payload: { id: slot.id } });
       });
-      setSelectedSlot(null);
-      alert('Đã đặt 1 ca học!');
+      setSelectedSlots([]);
+      alert(`Đã đặt ${selectedSlots.length} ca học!`);
     }
   };
-
-  // Get the selected slot object for display
-  const selectedSlotObj = selectedSlot ? allSlots.find(s => s.id === selectedSlot) : null;
 
   return (
     <>
@@ -246,37 +247,24 @@ export function TutorProfilePage() {
               <p>Chọn các khung giờ trống để các học viên có thể đặt lịch. Bạn có thể chọn từ 1-2 ca trên một lần.</p>
             </div>
 
-            <div className="schedule-stats">
-              <div className="stat-box">
-                <span className="stat-label">Chưa chọn:</span>
-                <span className="stat-count">{futureSlots.length}</span>
-              </div>
-              <div className="stat-box">
-                <span className="stat-label">Đã đặt:</span>
-                <span className="stat-count">{profile?.scheduleSlots?.length || 0}</span>
-              </div>
-              <div className="stat-box">
-                <span className="stat-label">Chọn hiện tại:</span>
-                <span className="stat-count selected">{selectedSlot ? 1 : 0}/1</span>
-              </div>
-            </div>
-
-            {selectedSlot && selectedSlotObj && (
-              <div className="selected-slot-display">
-                <div className="selected-slot-badge">
-                  <div className="slot-day-name">{selectedSlotObj.dayName}</div>
-                  <div className="slot-time-large">{selectedSlotObj.time}</div>
-                  <div className="slot-date-label">{selectedSlotObj.dayName} {selectedSlotObj.display}</div>
+            <div className="selected-slots-container">
+              {selectedSlots && selectedSlots.length > 0 ? (
+                <div className="slot-tags">
+                  {selectedSlots.map((s) => {
+                    const d = new Date(s.date);
+                    const dateStr = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+                    return (
+                      <div key={s.id} className="slot-tag">
+                        <span className="slot-text">{s.time} - {dateStr}</span>
+                        <button className="slot-remove" onClick={() => handleRemoveSlot(s.id)} title="Xóa">✕</button>
+                      </div>
+                    );
+                  })}
                 </div>
-                <button 
-                  className="btn-remove-slot"
-                  onClick={() => setSelectedSlot(null)}
-                  title="Click để hủy chọn"
-                >
-                  ✕
-                </button>
-              </div>
-            )}
+              ) : (
+                <div className="slot-placeholder">Chưa có khung giờ nào được chọn...</div>
+              )}
+            </div>
 
             <div className="calendar-container">
               {Object.entries(slotsByDate).map(([date, slots]) => {
@@ -292,13 +280,13 @@ export function TutorProfilePage() {
                     </div>
                     <div className="time-slots-grid">
                       {slots.map((slot) => {
-                        const isSelected = selectedSlot === slot.id;
+                        const isSelected = selectedSlots.some(s => s.id === slot.id);
                         const isAlreadyBooked = profile.scheduleSlots?.some(s => s.id === slot.id);
                         return (
                           <button
                             key={slot.id}
                             className={`time-slot ${isSelected ? 'selected' : ''} ${isAlreadyBooked ? 'booked' : ''}`}
-                            onClick={() => !isAlreadyBooked && handleSlotClick(slot.id)}
+                            onClick={() => !isAlreadyBooked && handleSlotClick(slot)}
                             disabled={isAlreadyBooked}
                             title={`${slot.time} - ${slot.display}`}
                           >
@@ -312,11 +300,11 @@ export function TutorProfilePage() {
               })}
             </div>
 
-            {selectedSlot && (
+            {selectedSlots.length > 0 && (
               <div className="schedule-confirm">
-                <p>Bạn đã chọn 1 ca học</p>
-                <button className="btn btn-primary" onClick={handleConfirmSlot}>
-                  ✓ Xác nhận (1 ca)
+                <p>Bạn đã chọn {selectedSlots.length} ca học</p>
+                <button className="btn btn-primary" onClick={handleConfirmSlots}>
+                  ✓ Xác nhận ({selectedSlots.length} ca)
                 </button>
               </div>
             )}
