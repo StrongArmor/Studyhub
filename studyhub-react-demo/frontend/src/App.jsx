@@ -1,5 +1,5 @@
 import { AppProvider, useApp } from './store/AppContext';
-import { Toast, EmailModal, BookingModal, ReviewModal, ReportModal } from './components/common';
+import { Toast, EmailModal, BookingModal, ReviewModal, ReportModal, TutorModal } from './components/common';
 import { HomePage } from './components/home';
 import { RoleSelectPage, LoginPage, RegisterPage, OTPPage } from './components/auth';
 import { TutorListPage } from './components/tutors';
@@ -32,6 +32,6 @@ function Router() {
 }
 
 export default function App() {
-  return <AppProvider><div className="app-shell"><Toast /><EmailModal /><BookingModal /><ReviewModal /><ReportModal /><Router /></div></AppProvider>;
+  return <AppProvider><div className="app-shell"><Toast /><EmailModal /><BookingModal /><ReviewModal /><ReportModal /><TutorModal /><Router /></div></AppProvider>;
 }
 

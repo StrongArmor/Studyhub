@@ -45,3 +45,80 @@ export function ReportModal() {
   if (!reportModal.open) return null;
   return <div className="modal-overlay"><div className="error-modal"><div className="error-modal-title">Báo cáo / Khiếu nại</div><div className="input-group"><label className="input-label">Khóa học / Gia sư</label><div className="muted">{reportModal.tutorName}</div></div><div className="input-group"><label className="input-label">Loại báo cáo</label><select className="filter-select" value={reportModal.issue} onChange={(e) => dispatch({ type: 'SET_REPORT_MODAL', payload: { issue: e.target.value } })}><option value="quality">Chất lượng buổi học</option><option value="attendance">Vấn đề điểm danh / vào lớp</option><option value="payment">Thanh toán / hoàn tiền</option><option value="behavior">Hành vi / thái độ</option><option value="other">Khác</option></select></div><div className="input-group"><label className="input-label">Nội dung</label><textarea className="textarea-field" rows="4" value={reportModal.detail} onChange={(e) => dispatch({ type: 'SET_REPORT_MODAL', payload: { detail: e.target.value } })} placeholder="Mô tả chi tiết để quản lý xử lý..." /></div><div className="error-modal-actions"><button className="btn btn-primary" style={{ flex: 1 }} onClick={submitReport}>Gửi báo cáo</button><button className="btn btn-outline" style={{ flex: 1 }} onClick={() => dispatch({ type: 'SET_REPORT_MODAL', payload: { open: false, bookingId: null, tutorName: '', issue: 'quality', detail: '' } })}>Đóng</button></div></div></div>;
 }
+
+export function TutorModal() {
+  const { state, dispatch } = useApp();
+  const { tutorModal } = state;
+  const { openBookingModal } = useBooking();
+
+  if (!tutorModal?.open || !tutorModal.tutor) return null;
+  const t = tutorModal.tutor;
+
+  return (
+    <div className="modal-overlay" onClick={() => dispatch({ type: 'SET_TUTOR_MODAL', payload: { open: false, tutor: null } })}>
+      <div className="tutor-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="tutor-modal-close" onClick={() => dispatch({ type: 'SET_TUTOR_MODAL', payload: { open: false, tutor: null } })}>✕</button>
+
+        <div className="tutor-modal-header">
+          <div className="tutor-avatar-lg" style={{ background: `${t.color}20`, color: t.color }}>
+            {t.initials}
+          </div>
+          <div className="tutor-info-section">
+            <h2 className="tutor-name">{t.name}</h2>
+            <div className="tutor-rating">⭐ {t.rating} <span>({t.reviews} đánh giá)</span></div>
+            <div className="tutor-status" style={{ color: t.status === 'Online' ? '#2F9E44' : '#666' }}>
+              ● {t.status}
+            </div>
+          </div>
+        </div>
+
+        <div className="tutor-modal-body">
+          <div className="info-block">
+            <h3>Giới thiệu</h3>
+            <p>{t.desc}</p>
+          </div>
+
+          <div className="info-block">
+            <h3>Chuyên môn</h3>
+            <div className="subjects-list">
+              {t.subjects?.map((s) => (
+                <span key={s} className="subject-tag">{s}</span>
+              ))}
+            </div>
+          </div>
+
+          <div className="info-row">
+            <div className="info-item">
+              <span className="info-label">Số buổi dạy</span>
+              <span className="info-value">{t.sessions?.toLocaleString()}</span>
+            </div>
+            <div className="info-item">
+              <span className="info-label">Giá / 45 phút</span>
+              <span className="info-value">{t.price?.toLocaleString()}đ</span>
+            </div>
+          </div>
+
+          <div className="info-row">
+            <div className="info-item">
+              <span className="info-label">Khung giờ</span>
+              <span className="info-value capitalize">{t.timeSlot === 'morning' ? 'Sáng' : t.timeSlot === 'afternoon' ? 'Chiều' : 'Tối'}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="tutor-modal-footer">
+          <button className="btn btn-outline" onClick={() => dispatch({ type: 'SET_TUTOR_MODAL', payload: { open: false, tutor: null } })}>
+            Đóng
+          </button>
+          <button className="btn btn-primary" onClick={() => {
+            openBookingModal(t);
+            dispatch({ type: 'SET_TUTOR_MODAL', payload: { open: false, tutor: null } });
+          }}>
+            Đặt lịch học
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+

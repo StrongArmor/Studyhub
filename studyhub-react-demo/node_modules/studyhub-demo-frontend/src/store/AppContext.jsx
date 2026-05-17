@@ -105,6 +105,7 @@ function reducer(state, action) {
     case 'SET_HERO_SEARCH': return { ...state, heroSearch: action.payload };
     case 'SET_BOOKING_STAGE': return { ...state, bookingStage: action.payload };
     case 'SET_ADMIN': return { ...state, admin: { ...state.admin, ...action.payload } };
+    case 'SET_TUTOR_MODAL': return { ...state, tutorModal: { ...state.tutorModal, ...action.payload } };
     default: return state;
   }
 }

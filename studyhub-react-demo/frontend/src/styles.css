@@ -315,3 +315,29 @@ a { cursor: pointer; text-decoration: none; }
 .user-dropdown { position: absolute; right: 0; top: calc(100% + 8px); background: #fff; border: 1px solid #e9ecef; border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.12); min-width: 180px; overflow: hidden; z-index: 200; }
 .user-dropdown button { width: 100%; text-align: left; padding: 12px 14px; border: none; background: #fff; cursor: pointer; font: inherit; }
 .user-dropdown button:hover { background: #f8f9fa; }
+.tutor-modal { background: #fff; border-radius: 16px; padding: 40px; width: 100%; max-width: 520px; box-shadow: 0 12px 48px rgba(0,0,0,.2); position: relative; animation: fadeUp 0.3s ease; }
+.tutor-modal-close { position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; background: transparent; border: none; font-size: 24px; color: #adb5bd; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+.tutor-modal-close:hover { background: #f8f9fa; color: #212529; }
+.tutor-modal-header { display: flex; gap: 18px; margin-bottom: 28px; align-items: flex-start; }
+.tutor-avatar-lg { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; flex-shrink: 0; }
+.tutor-info-section h2 { font-size: 22px; font-weight: 800; color: #212529; margin-bottom: 6px; }
+.tutor-info-section { flex: 1; }
+.tutor-name { font-size: 22px; font-weight: 800; color: #212529; margin: 0 0 6px; }
+.tutor-rating { display: flex; align-items: center; gap: 4px; font-size: 14px; color: #868e96; margin-bottom: 8px; }
+.tutor-rating span { font-size: 12px; }
+.tutor-status { font-size: 13px; font-weight: 600; }
+.tutor-modal-body { border-top: 1.5px solid #e9ecef; border-bottom: 1.5px solid #e9ecef; padding: 24px 0; margin-bottom: 24px; }
+.info-block { margin-bottom: 20px; }
+.info-block:last-of-type { margin-bottom: 0; }
+.info-block h3 { font-size: 14px; font-weight: 700; color: #212529; margin-bottom: 10px; }
+.info-block p { font-size: 14px; color: #495057; line-height: 1.6; margin: 0; }
+.subjects-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.subject-tag { display: inline-flex; align-items: center; gap: 6px; background: #EEF2FF; color: #3B5BDB; border-radius: 20px; padding: 6px 12px; font-size: 13px; font-weight: 600; }
+.info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.info-row:last-child { margin-bottom: 0; }
+.info-item { display: grid; gap: 6px; }
+.info-label { font-size: 12px; color: #adb5bd; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+.info-value { font-size: 15px; font-weight: 700; color: #212529; }
+.tutor-modal-footer { display: flex; gap: 12px; }
+.tutor-modal-footer .btn { flex: 1; }
+
