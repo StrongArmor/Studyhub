@@ -1,16 +1,158 @@
+import { useState, useRef } from 'react';
 import { useApp } from '../../store/AppContext';
 import { Navbar, Footer } from '../common';
-import { useWallet } from '../../hooks';
 
 export function WalletPage() {
-  const { state, dispatch } = useApp();
-  const { wallet, topUp, saveBank } = useWallet();
-  return <><Navbar active="role-select" /><div className="page-container"><div className="page-header"><h1>Ví cá nhân</h1><p>Nạp tiền, lịch sử giao dịch và tài khoản ngân hàng</p></div><div className="wallet-layout"><div className="wallet-card balance-card"><div className="muted">Số dư khả dụng</div><div className="balance-value">{wallet.balance.toLocaleString()}đ</div><div className="row-actions"><button className="btn btn-primary" onClick={topUp}>Nạp tiền</button><button className="btn btn-outline" onClick={() => dispatch({ type: 'SET_PAGE', payload: 'withdraw' })}>Rút tiền</button></div><div className="input-group"><label className="input-label">Số tiền nạp</label><input className="input-field no-icon" value={wallet.topup} onChange={(e) => dispatch({ type: 'SET_WALLET', payload: { topup: e.target.value } })} /></div><div className="input-group"><label className="input-label">Tài khoản ngân hàng</label><input className="input-field no-icon" value={wallet.selectedBank} onChange={(e) => dispatch({ type: 'SET_WALLET', payload: { selectedBank: e.target.value } })} placeholder="VCB **** 0001" /></div><div className="row-actions"><button className="btn btn-outline" onClick={saveBank}>Lưu ngân hàng</button></div></div><div className="wallet-card"><h3>Tài khoản ngân hàng</h3><div className="bank-list">{wallet.banks.map((b) => <div key={b} className={`bank-item ${wallet.selectedBank === b ? 'active' : ''}`} onClick={() => dispatch({ type: 'SET_WALLET', payload: { selectedBank: b } })}>{b}</div>)}</div></div><div className="wallet-card"><h3>Lịch sử giao dịch</h3><div className="transaction-list">{wallet.transactions.map((t) => <div key={t.id} className="txn-item"><div><strong>{t.label}</strong><div className="muted">{t.time}</div></div><div className={t.type === 'in' ? 'txn-in' : 'txn-out'}>{t.type === 'in' ? '+' : '-'}{t.amount.toLocaleString()}đ</div></div>)}</div></div></div></div><Footer /></>;
+  const { state, dispatch, showToast } = useApp();
+  const { wallet } = state;
+  const [mode, setMode] = useState(null);
+  const [showAllTxn, setShowAllTxn] = useState(false);
+  const [step, setStep] = useState('form');
+  const [amount, setAmount] = useState('');
+  const [bank, setBank] = useState(wallet.banks[0] || '');
+  const [otp, setOtp] = useState(['','','','','','']);
+  const otpRefs = useRef([]);
+
+  const open = (m) => { setMode(m); setStep('form'); setAmount(''); setBank(wallet.banks[0] || ''); setOtp(['','','','','','']); };
+  const close = () => setMode(null);
+
+  const handleContinue = () => {
+    const amt = Number(amount);
+    if (!amt || amt < 10000) return showToast('Số tiền tối thiểu 10.000đ', 'error');
+    if (mode === 'withdraw' && amt > wallet.balance) return showToast('Số tiền vượt số dư khả dụng', 'error');
+    if (!bank) return showToast('Vui lòng chọn tài khoản ngân hàng', 'error');
+    setStep('otp');
+  };
+
+  const handleConfirm = () => {
+    if (otp.join('').length < 6) return showToast('Vui lòng nhập đủ 6 chữ số OTP', 'error');
+    const amt = Number(amount);
+    if (mode === 'topup') {
+      dispatch({ type: 'SET_WALLET', payload: { balance: wallet.balance + amt, transactions: [{ id: Date.now(), label: `Nạp tiền từ ${bank}`, amount: amt, type: 'in', time: 'Vừa xong' }, ...wallet.transactions] } });
+    } else {
+      dispatch({ type: 'SET_WALLET', payload: { balance: wallet.balance - amt, transactions: [{ id: Date.now(), label: `Rút tiền về ${bank}`, amount: amt, type: 'out', time: 'Vừa xong' }, ...wallet.transactions] } });
+    }
+    setStep('done');
+  };
+
+  const setDigit = (idx, value) => {
+    const cleaned = value.replace(/\D/g, '').slice(0, 1);
+    const next = [...otp]; next[idx] = cleaned;
+    setOtp(next);
+    if (cleaned && idx < 5) setTimeout(() => otpRefs.current[idx + 1]?.focus(), 0);
+  };
+  const handleKey = (e, idx) => {
+    if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
+      const next = [...otp]; next[idx - 1] = '';
+      setOtp(next);
+      setTimeout(() => otpRefs.current[idx - 1]?.focus(), 0);
+    }
+  };
+
+  const label = mode === 'topup' ? 'Nạp tiền' : 'Rút tiền';
+
+  return (
+    <><Navbar active="role-select" />
+    <div className="page-container">
+      <div className="page-header"><h1>Ví cá nhân</h1><p>Nạp tiền, rút tiền và lịch sử giao dịch</p></div>
+      <div className="wallet-layout">
+
+        <div className="wallet-card balance-card">
+          <div className="muted">Số dư khả dụng</div>
+          <div className="balance-value">{wallet.balance.toLocaleString()}đ</div>
+
+          {!mode && (
+            <div className="row-actions">
+              <button className="btn btn-primary" onClick={() => open('topup')}>Nạp tiền</button>
+              <button className="btn btn-outline" onClick={() => open('withdraw')}>Rút tiền</button>
+            </div>
+          )}
+
+          {mode && step === 'form' && (
+            <div style={{ marginTop: 16 }}>
+              <div className="input-group">
+                <label className="input-label">Số tiền {mode === 'topup' ? 'nạp' : 'rút'}</label>
+                <input className="input-field no-icon" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="500000" inputMode="numeric" />
+              </div>
+              <div className="input-group">
+                <label className="input-label">Tài khoản ngân hàng</label>
+                <div className="bank-list">
+                  {wallet.banks.map((b) => (
+                    <div key={b} className={`bank-item ${bank === b ? 'active' : ''}`} onClick={() => setBank(b)}>{b}</div>
+                  ))}
+                </div>
+              </div>
+              <div className="row-actions">
+                <button className="btn btn-primary" onClick={handleContinue}>Tiếp tục</button>
+                <button className="btn btn-outline" onClick={close}>Huỷ</button>
+              </div>
+            </div>
+          )}
+
+          {mode && step === 'otp' && (
+            <div style={{ marginTop: 16 }}>
+              <div className="muted" style={{ marginBottom: 12 }}>Nhập mã OTP xác nhận {label.toLowerCase()}</div>
+              <div className="otp-inputs">
+                {otp.map((digit, idx) => (
+                  <input key={idx} ref={(el) => otpRefs.current[idx] = el} className={`otp-input ${digit ? 'filled' : ''}`} type="text" inputMode="numeric" maxLength={1} value={digit} onChange={(e) => setDigit(idx, e.target.value)} onKeyDown={(e) => handleKey(e, idx)} />
+                ))}
+              </div>
+              <div className="row-actions" style={{ marginTop: 16 }}>
+                <button className="btn btn-primary" onClick={handleConfirm}>Xác nhận</button>
+                <button className="btn btn-outline" onClick={() => setStep('form')}>Quay lại</button>
+              </div>
+            </div>
+          )}
+
+          {mode && step === 'done' && (
+            <div style={{ marginTop: 16 }}>
+              <div className="status-banner">{label} {Number(amount).toLocaleString()}đ thành công!</div>
+              <div className="row-actions" style={{ marginTop: 12 }}>
+                <button className="btn btn-outline" onClick={close}>Xong</button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="wallet-card">
+          <div className="admin-card-header">
+            <h3>Lịch sử giao dịch</h3>
+            {wallet.transactions.length > 5 && <button className="btn btn-outline btn-sm" onClick={() => setShowAllTxn(true)}>Xem tất cả ({wallet.transactions.length})</button>}
+          </div>
+          <div className="transaction-list">
+            {wallet.transactions.slice(0, 5).map((t) => (
+              <div key={t.id} className="txn-item">
+                <div><strong>{t.label}</strong><div className="muted">{t.time}</div></div>
+                <div className={t.type === 'in' ? 'txn-in' : 'txn-out'}>{t.type === 'in' ? '+' : '-'}{t.amount.toLocaleString()}đ</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {showAllTxn && (
+          <div className="modal-overlay" onClick={() => setShowAllTxn(false)}>
+            <div className="error-modal" style={{ maxWidth: 480, width: '90%', maxHeight: '80vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
+              <div className="error-modal-title">Tất cả giao dịch</div>
+              <div className="transaction-list" style={{ marginTop: 12 }}>
+                {wallet.transactions.map((t) => (
+                  <div key={t.id} className="txn-item">
+                    <div><strong>{t.label}</strong><div className="muted">{t.time}</div></div>
+                    <div className={t.type === 'in' ? 'txn-in' : 'txn-out'}>{t.type === 'in' ? '+' : '-'}{t.amount.toLocaleString()}đ</div>
+                  </div>
+                ))}
+              </div>
+              <div className="error-modal-actions" style={{ marginTop: 16 }}>
+                <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => setShowAllTxn(false)}>Đóng</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
+      </div>
+    </div>
+    <Footer /></>
+  );
 }
 
-export function WithdrawPage() {
-  const { state, dispatch } = useApp();
-  const { wallet, withdraw, startWithdraw, confirmWithdraw } = useWallet();
-  const setOtp = (idx, value) => { const next = [...withdraw.otp]; next[idx] = value.replace(/\D/g, '').slice(0, 1); dispatch({ type: 'SET_WITHDRAW', payload: { otp: next } }); };
-  return <><Navbar active="role-select" /><div className="page-container"><div className="page-header"><h1>Rút tiền</h1><p>Chọn tài khoản nhận tiền, xác nhận OTP và theo dõi trạng thái</p></div><div className="withdraw-layout"><div className="wallet-card"><h3>Ví cá nhân</h3><div className="balance-value" style={{ fontSize: 36 }}>{wallet.balance.toLocaleString()}đ</div><div className="input-group"><label className="input-label">Số tiền rút</label><input className="input-field no-icon" value={withdraw.amount} onChange={(e) => dispatch({ type: 'SET_WITHDRAW', payload: { amount: e.target.value } })} placeholder="1000000" /></div><div className="input-group"><label className="input-label">Tài khoản nhận tiền</label><input className="input-field no-icon" value={withdraw.bank} onChange={(e) => dispatch({ type: 'SET_WITHDRAW', payload: { bank: e.target.value } })} placeholder="VCB **** 2891" /></div><div className="row-actions"><button className="btn btn-primary" onClick={startWithdraw}>Bắt đầu rút</button><button className="btn btn-outline" onClick={() => dispatch({ type: 'SET_WITHDRAW', payload: { step: 'maintenance' } })}>Ngân hàng bảo trì</button></div>{withdraw.step === 'insufficient' ? <div className="error-modal-body" style={{ marginTop: 16 }}>Số tiền rút vượt số dư khả dụng.</div> : null}{withdraw.step === 'maintenance' ? <div className="error-modal-body" style={{ marginTop: 16 }}>Ngân hàng bảo trì, giao dịch đang xử lý.</div> : null}</div><div className="wallet-card"><div className="section-title-small">{withdraw.step === 'select' ? 'Chọn tài khoản nhận tiền' : withdraw.step === 'otp' ? 'Xác nhận OTP' : withdraw.step === 'done' ? 'Hoàn tất' : withdraw.step === 'maintenance' ? 'Đang xử lý' : 'Trạng thái rút tiền'}</div>{withdraw.step === 'select' && <div className="bank-list">{wallet.banks.map((b) => <div key={b} className={`bank-item ${withdraw.bank === b ? 'active' : ''}`} onClick={() => dispatch({ type: 'SET_WITHDRAW', payload: { bank: b } })}>{b}</div>)}</div>}{withdraw.step === 'otp' && <div><div className="otp-inputs">{withdraw.otp.map((digit, idx) => <input key={idx} className={`otp-input ${digit ? 'filled' : ''}`} value={digit} onChange={(e) => setOtp(idx, e.target.value)} maxLength={1} />)}</div><button className="btn btn-primary btn-full" onClick={confirmWithdraw}>Xác nhận rút tiền</button></div>}{withdraw.step === 'done' && <div className="status-banner">Rút tiền thành công, lịch sử ví đã được cập nhật.</div>}{withdraw.step === 'maintenance' && <div className="status-banner">Ngân hàng bảo trì — đang xử lý giao dịch.</div>}</div></div></div><Footer /></>;
-}
+export function WithdrawPage() { return <WalletPage />; }

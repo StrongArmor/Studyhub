@@ -109,6 +109,7 @@ function reducer(state, action) {
     case 'CANCEL_BOOKING': return { ...state, bookings: state.bookings.filter(b => b.id !== action.payload) };
     case 'ADD_REPORT': return { ...state, reports: [action.payload, ...state.reports] };
     case 'SET_REPORTS': return { ...state, reports: action.payload };
+    case 'UPDATE_REPORT_STATUS': return { ...state, reports: state.reports.map((r) => r.id === action.payload.id ? { ...r, status: action.payload.status } : r) };
     case 'SET_WALLET': return { ...state, wallet: { ...state.wallet, ...action.payload } };
     case 'SET_WITHDRAW': return { ...state, withdraw: { ...state.withdraw, ...action.payload } };
     case 'SET_TUTOR_FORM': return { ...state, tutorForm: { ...state.tutorForm, ...action.payload } };

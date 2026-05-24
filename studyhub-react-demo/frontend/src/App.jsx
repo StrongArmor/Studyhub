@@ -14,7 +14,7 @@ function Router() {
   const { state, navigate } = useApp();
   const requireAuth = (node) => (state.currentUser ? node : <div className="page-container"><h1>Bạn cần đăng nhập</h1><p>Vui lòng đăng nhập để truy cập trang này.</p><button className="btn btn-primary" onClick={() => navigate('role-select')}>Đăng nhập ngay</button></div>);
   switch (state.page) {
-    case 'home': return <HomePage />;
+    case 'home': return state.currentUser?.role === 'admin' ? <AdminPanel /> : <HomePage />;
     case 'role-select': return <RoleSelectPage />;
     case 'login-student': return <LoginPage role="student" />;
     case 'login-tutor': return <LoginPage role="tutor" />;
@@ -24,8 +24,8 @@ function Router() {
      case 'tutors': return <TutorListPage />;
     case 'tutor-profile': return requireAuth(<TutorProfilePage />);
     case 'dashboard': return requireAuth(<StudentDashboard />);
-    case 'wallet': return requireAuth(<WalletPage />);
-    case 'withdraw': return requireAuth(<WithdrawPage />);
+    case 'wallet':
+    case 'withdraw': return requireAuth(<WalletPage />);
     case 'admin': return requireAuth(<AdminPanel />);
     case 'become-tutor': return <BecomeTutorPage />;
     case 'booking-center':
