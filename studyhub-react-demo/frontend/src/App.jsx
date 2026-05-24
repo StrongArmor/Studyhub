@@ -8,6 +8,7 @@ import { StudentDashboard } from './components/dashboard';
 import { WalletPage, WithdrawPage } from './components/wallet';
 import { AdminPanel } from './components/admin';
 import { BookingFlowPage } from './components/booking';
+import { BecomeTutorPage } from './components/become-tutor';
 
 function Router() {
   const { state, navigate } = useApp();
@@ -26,7 +27,7 @@ function Router() {
     case 'wallet': return requireAuth(<WalletPage />);
     case 'withdraw': return requireAuth(<WithdrawPage />);
     case 'admin': return requireAuth(<AdminPanel />);
-    case 'become-tutor': return <div className="page-container"><h1>Be a Tutor</h1></div>;
+    case 'become-tutor': return <BecomeTutorPage />;
     case 'booking-center':
     case 'online-learn': return requireAuth(<BookingFlowPage />);
     default: return <HomePage />;
