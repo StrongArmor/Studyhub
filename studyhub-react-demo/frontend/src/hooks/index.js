@@ -86,7 +86,8 @@ export function useBooking() {
   const submitBooking = () => {
     const { bookingModal } = state;
     if (!bookingModal.date || !bookingModal.time) return showToast('Vui lòng chọn ngày và giờ học', 'error');
-    dispatch({ type: 'ADD_BOOKING', payload: { id: Date.now(), tutorName: bookingModal.tutor?.name || '', tutorInitials: bookingModal.tutor?.initials || '', tutorColor: bookingModal.tutor?.color || '#3B5BDB', subject: bookingModal.tutor?.subjects?.[0] || '', date: bookingModal.date, time: bookingModal.time, duration: 45, price: bookingModal.tutor?.price || 0, status: 'confirmed' } });
+    const meetId = Math.random().toString(36).slice(2, 5) + '-' + Math.random().toString(36).slice(2, 6) + '-' + Math.random().toString(36).slice(2, 5);
+    dispatch({ type: 'ADD_BOOKING', payload: { id: Date.now(), tutorName: bookingModal.tutor?.name || '', tutorInitials: bookingModal.tutor?.initials || '', tutorColor: bookingModal.tutor?.color || '#3B5BDB', subject: bookingModal.tutor?.subjects?.[0] || '', date: bookingModal.date, time: bookingModal.time, duration: 45, price: bookingModal.tutor?.price || 0, status: 'confirmed', meetLink: `https://meet.google.com/${meetId}` } });
     dispatch({ type: 'SET_BOOKING_MODAL', payload: { open: false, tutor: null } });
     showToast(`Đã đặt lịch với ${bookingModal.tutor?.name} thành công!`, 'success');
     navigate('dashboard');
@@ -109,9 +110,10 @@ export function useWallet() {
   const { state, dispatch, showToast } = useApp();
   const { wallet, withdraw } = state;
   const topUp = () => { const amount = Number(wallet.topup || 0); if (!amount || amount < 100000) return showToast('Mức nạp tối thiểu là 100.000đ', 'error'); dispatch({ type: 'SET_WALLET', payload: { balance: wallet.balance + amount, transactions: [{ id: Date.now(), label: 'Nạp tiền thành công', amount, type: 'in', time: 'Vừa xong' }, ...wallet.transactions] } }); showToast(`Đã nạp ${amount.toLocaleString()}đ vào ví`, 'success'); };
+  const saveBank = () => { const bank = wallet.selectedBank.trim(); if (!bank) return showToast('Vui lòng nhập số tài khoản', 'error'); if (wallet.banks.includes(bank)) return showToast('Tài khoản đã có trong danh sách', 'error'); dispatch({ type: 'SET_WALLET', payload: { banks: [...wallet.banks, bank] } }); showToast('Đã lưu tài khoản ngân hàng', 'success'); };
   const startWithdraw = () => { const amount = Number(withdraw.amount || 0); if (!amount || amount < 50000) return showToast('Mức rút tối thiểu là 50.000đ', 'error'); if (amount > wallet.balance) { dispatch({ type: 'SET_WITHDRAW', payload: { step: 'insufficient' } }); return showToast('Số tiền vượt số dư khả dụng', 'error'); } dispatch({ type: 'SET_WITHDRAW', payload: { step: 'otp' } }); };
   const confirmWithdraw = () => { if (withdraw.otp.join('').length < 6) return showToast('Vui lòng nhập đủ OTP', 'error'); const amount = Number(withdraw.amount || 0); dispatch({ type: 'SET_WALLET', payload: { balance: wallet.balance - amount, transactions: [{ id: Date.now(), label: `Rút tiền về ${withdraw.bank}`, amount, type: 'out', time: 'Vừa xong' }, ...wallet.transactions] } }); dispatch({ type: 'SET_WITHDRAW', payload: { step: 'done' } }); showToast('Rút tiền thành công', 'success'); };
-  return { wallet, withdraw, topUp, startWithdraw, confirmWithdraw };
+  return { wallet, withdraw, topUp, saveBank, startWithdraw, confirmWithdraw };
 }
 
 export function useTutorForm() {

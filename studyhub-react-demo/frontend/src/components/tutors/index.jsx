@@ -174,21 +174,13 @@ export function TutorListPage() {
               )}
             </div>
             {!tutors.length ? <SuggestedSection onBook={openBookingModal} /> : null}
-            <div className="pagination">
-              <button className="btn page-btn page-btn-text" onClick={() => alert('Đây là trang đầu tiên')}>
-                Trước
-              </button>
-              <button className="page-btn active">1</button>
-              <button className="page-btn" onClick={() => alert('Demo - chỉ có 1 trang')}>
-                2
-              </button>
-              <button className="page-btn" onClick={() => alert('Demo - chỉ có 1 trang')}>
-                3
-              </button>
-              <button className="btn page-btn page-btn-text" onClick={() => alert('Demo - chỉ có 1 trang')}>
-                Sau
-              </button>
-            </div>
+            {tutors.length > 0 && (
+              <div className="pagination">
+                <button className="btn page-btn page-btn-text" disabled>Trước</button>
+                <button className="page-btn active">1</button>
+                <button className="btn page-btn page-btn-text" disabled>Sau</button>
+              </div>
+            )}
           </div>
         </div>
       </div>
