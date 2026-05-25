@@ -42,9 +42,9 @@ const initialState = {
   filter: { search: '', subject: '', price: '', rating: '', timeSlot: '' },
   availableOnly: false,
   bookings: [
-    { id: 1, tutorName: 'Nguyễn Minh Anh', tutorInitials: 'NMA', tutorColor: '#3B5BDB', subject: 'Toán học', date: '2026-05-08', time: '19:00', duration: 45, price: 150000, status: 'confirmed' },
-    { id: 2, tutorName: 'Trần Hải Đăng', tutorInitials: 'THĐ', tutorColor: '#7C3AED', subject: 'IELTS Speaking', date: '2026-05-10', time: '20:00', duration: 30, price: 200000, status: 'confirmed' },
-    { id: 3, tutorName: 'Phạm Quốc Khánh', tutorInitials: 'PQK', tutorColor: '#0C8599', subject: 'Python cơ bản', date: '2026-04-28', time: '20:30', duration: 45, price: 250000, status: 'completed' }
+    { id: 1, tutorName: 'Nguyễn Minh Anh', tutorInitials: 'NMA', tutorColor: '#3B5BDB', subject: 'Toán học', date: '2026-05-08', time: '19:00', duration: 45, price: 150000, status: 'confirmed', meetLink: 'https://meet.google.com/abc-defg-hij' },
+    { id: 2, tutorName: 'Trần Hải Đăng', tutorInitials: 'THĐ', tutorColor: '#7C3AED', subject: 'IELTS Speaking', date: '2026-05-10', time: '20:00', duration: 30, price: 200000, status: 'confirmed', meetLink: 'https://meet.google.com/klm-nopq-rst' },
+    { id: 3, tutorName: 'Phạm Quốc Khánh', tutorInitials: 'PQK', tutorColor: '#0C8599', subject: 'Python cơ bản', date: '2026-04-28', time: '20:30', duration: 45, price: 250000, status: 'completed', meetLink: 'https://meet.google.com/uvw-xyz1-234' }
   ],
   bookingModal: { open: false, tutor: null, date: '2026-05-20', time: '19:00', note: '' },
   reviewModal: { open: false, tutorName: '', rating: '5', comment: '' },
@@ -109,15 +109,18 @@ function reducer(state, action) {
     case 'CANCEL_BOOKING': return { ...state, bookings: state.bookings.filter(b => b.id !== action.payload) };
     case 'ADD_REPORT': return { ...state, reports: [action.payload, ...state.reports] };
     case 'SET_REPORTS': return { ...state, reports: action.payload };
+    case 'UPDATE_REPORT_STATUS': return { ...state, reports: state.reports.map((r) => r.id === action.payload.id ? { ...r, status: action.payload.status } : r) };
     case 'SET_WALLET': return { ...state, wallet: { ...state.wallet, ...action.payload } };
     case 'SET_WITHDRAW': return { ...state, withdraw: { ...state.withdraw, ...action.payload } };
     case 'SET_TUTOR_FORM': return { ...state, tutorForm: { ...state.tutorForm, ...action.payload } };
     case 'RESET_TUTOR_FORM': return { ...state, tutorForm: initialState.tutorForm };
     case 'ADD_APPLICATION': return { ...state, applications: [action.payload, ...state.applications] };
+    case 'UPDATE_APPLICATION_STATUS': return { ...state, applications: state.applications.map((a) => a.id === action.payload.id ? { ...a, status: action.payload.status } : a) };
     case 'SET_OTP_DIGITS': return { ...state, otpDigits: action.payload };
     case 'SET_OTP_TIMER': return { ...state, otpTimer: action.payload };
     case 'SET_HERO_SEARCH': return { ...state, heroSearch: action.payload };
     case 'SET_BOOKING_STAGE': return { ...state, bookingStage: action.payload };
+    case 'SET_SESSION': return { ...state, session: { ...state.session, ...action.payload } };
      case 'SET_ADMIN': return { ...state, admin: { ...state.admin, ...action.payload } };
     case 'SET_TUTOR_MODAL': return { ...state, tutorModal: { ...state.tutorModal, ...action.payload } };
     case 'SET_TUTOR_PROFILE': return { ...state, tutorProfile: { ...state.tutorProfile, ...action.payload } };
@@ -143,6 +146,7 @@ function reducer(state, action) {
     case 'REMOVE_SCHEDULE_SLOT': return { ...state, tutorProfile: { ...state.tutorProfile, scheduleSlots: state.tutorProfile.scheduleSlots.filter(s => s.id !== action.payload) } };
     case 'SET_SELECTED_SLOTS': return { ...state, tutorProfile: { ...state.tutorProfile, selectedSlots: action.payload } };
     case 'SET_DECLINE_COUNT': return { ...state, tutorProfile: { ...state.tutorProfile, declineCount: action.payload } };
+      case 'UPDATE_TUTOR': return { ...state, tutors: state.tutors.map((t) => t.id === action.payload.id ? action.payload : t) };
     default: return state;
   }
 }

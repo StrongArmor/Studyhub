@@ -156,6 +156,20 @@ CREATE TABLE IF NOT EXISTS tutor_documents (
 ALTER TABLE IF EXISTS tutor_documents
   ADD CONSTRAINT fk_tutor_doc_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
+CREATE TABLE IF NOT EXISTS tutor_reviews (
+  id BIGSERIAL PRIMARY KEY,
+  tutor_user_id BIGINT NOT NULL,
+  student_id BIGINT,
+  booking_id BIGINT,
+  rating INTEGER NOT NULL,
+  comment TEXT,
+  created_at TEXT NOT NULL
+);
+
+ALTER TABLE IF EXISTS tutor_reviews
+  ADD CONSTRAINT fk_tutor_reviews_tutor FOREIGN KEY (tutor_user_id) REFERENCES users(id) ON DELETE CASCADE,
+  ADD CONSTRAINT fk_tutor_reviews_student FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE SET NULL;
+
 CREATE TABLE IF NOT EXISTS otp_sessions (
   id BIGSERIAL PRIMARY KEY,
   email TEXT NOT NULL UNIQUE,
