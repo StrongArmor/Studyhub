@@ -8,7 +8,7 @@ export function RoleSelectPage() {
   const { state, dispatch, navigate } = useApp();
   const { selectedRole } = state;
   const roles = [
-    { key: 'student', icon: '🎓', title: 'Người học',     desc: 'Tìm kiếm gia sư phù hợp, đặt lịch học 1-1 và nâng cao kiến thức mỗi ngày.', purple: false },
+    { key: 'user', icon: '🎓', title: 'Người học',     desc: 'Tìm kiếm gia sư phù hợp, đặt lịch học 1-1 và nâng cao kiến thức mỗi ngày.', purple: false },
     { key: 'tutor',   icon: '💼', title: 'Người dạy',     desc: 'Chia sẻ chuyên môn, tạo lịch dạy linh hoạt và tăng thu nhập từ việc giảng dạy.', purple: true },
     { key: 'admin',   icon: '🖥️', title: 'Quản trị viên', desc: 'Quản lý hệ thống, duyệt thông tin người dùng và đảm bảo môi trường học tập an toàn.', purple: true },
   ];
@@ -64,7 +64,7 @@ export function LoginPage({ role }) {
 
         <InputField label="Email" icon="✉️" value={login[emailKey]}
           onChange={v => dispatch({ type: 'SET_LOGIN', payload: { [emailKey]: v } })}
-          placeholder={isAdmin ? 'admin@studyhub.vn' : isTutor ? 'tutor@studyhub.vn' : 'student@studyhub.vn'} />
+          placeholder={isAdmin ? 'admin@studyhub.vn' : isTutor ? 'tutor@studyhub.vn' : 'user@studyhub.vn'} />
         <InputField label="Mật khẩu" icon="🔒" type="password" value={login[passKey]}
           onChange={v => dispatch({ type: 'SET_LOGIN', payload: { [passKey]: v } })}
           placeholder="••••••••" />

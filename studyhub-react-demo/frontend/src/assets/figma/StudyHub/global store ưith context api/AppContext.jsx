@@ -8,15 +8,15 @@ const initialState = {
   // Auth
   currentUser: null,
   authUsers: [
-    { email: 'student@studyhub.vn', password: '12345678', role: 'student', name: 'Học viên Demo' },
+    { email: 'user@studyhub.vn', password: '12345678', role: 'user', name: 'Học viên Demo' },
     { email: 'tutor@studyhub.vn',   password: '12345678', role: 'tutor',   name: 'Gia sư Demo'  },
     { email: 'admin@studyhub.vn',   password: '12345678', role: 'admin',   name: 'Admin Demo'   },
   ],
-  selectedRole: 'student',
+  selectedRole: 'user',
   pendingUser: null,
   register: { name: '', email: '', pass: '', confirm: '', agree: false },
   login: {
-    studentEmail: 'student@studyhub.vn', studentPass: '12345678',
+    studentEmail: 'user@studyhub.vn', studentPass: '12345678',
     tutorEmail:   'tutor@studyhub.vn',   tutorPass:   '12345678',
     adminEmail:   'admin@studyhub.vn',   adminPass:   '12345678',
   },

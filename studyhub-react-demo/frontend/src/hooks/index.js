@@ -34,7 +34,7 @@ export function useAuth() {
     const { otpDigits, pendingUser } = state;
     if (otpDigits.join('').length < 6) return showToast('Vui lòng nhập đủ 6 chữ số', 'error');
     if (!pendingUser) return;
-    const newUser = { name: pendingUser.name, email: pendingUser.email, password: pendingUser.password, role: 'student' };
+    const newUser = { name: pendingUser.name, email: pendingUser.email, password: pendingUser.password, role: 'user' };
     dispatch({ type: 'ADD_AUTH_USER', payload: newUser });
     dispatch({ type: 'SET_CURRENT_USER', payload: newUser });
     showToast(`🎉 Tạo tài khoản thành công! Chào mừng ${pendingUser.name}`, 'success');

@@ -279,6 +279,7 @@ a { cursor: pointer; text-decoration: none; }
 .admin-table th { color: #495057; font-weight: 700; }
 .role-pill, .status-pill { display: inline-flex; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; text-transform: capitalize; }
 .role-pill.student { background: #EEF2FF; color: #3B5BDB; }
+.role-pill.user { background: #EEF2FF; color: #3B5BDB; }
 .role-pill.tutor { background: #EDE9FE; color: #7C3AED; }
 .role-pill.admin { background: #FFF4E6; color: #F08C00; }
 .status-pill.active { background: #EBFBEE; color: #40C057; }
