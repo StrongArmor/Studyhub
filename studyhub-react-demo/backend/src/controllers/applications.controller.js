@@ -1,10 +1,57 @@
 import { mapApplication } from '../utils/serializers.js';
 import { getApplications as serviceGetApplications, deleteApplication } from '../services/applications.service.js';
 import { insertActivity as addActivity } from '../services/activity.service.js';
+import { createTutor, getTutorByUserId } from '../services/tutors.service.js';
 import { db } from '../config/db.js';
 import { sendError, sendSuccess } from '../utils/responses.js';
 
 const query = (text, params = []) => db.query(text, params);
+
+const buildInitials = (name) => String(name || '')
+  .trim()
+  .split(/\s+/)
+  .filter(Boolean)
+  .map((part) => part[0])
+  .join('')
+  .slice(0, 3)
+  .toUpperCase() || 'TUT';
+
+const promoteApplicationToTutor = async (application) => {
+  const userId = application.userId || (await query('SELECT id FROM users WHERE email = $1 LIMIT 1', [application.email])).rows[0]?.id || null;
+  if (!userId) {
+    throw new Error('Không tìm thấy tài khoản người dùng để chuyển sang gia sư');
+  }
+
+  await query('UPDATE users SET role = $1 WHERE id = $2', ['tutor', userId]);
+
+  const existingTutor = await getTutorByUserId(userId);
+  const tutorRow = existingTutor || await createTutor({
+    userId,
+    name: application.name,
+    initials: buildInitials(application.name),
+    subjects: application.subjects || [],
+    rating: 0,
+    reviews: 0,
+    price: Number(application.price || 0),
+    sessions: 0,
+    status: 'Offline',
+    bio: String(application.bio ?? ''),
+    desc: String(application.experience ?? ''),
+    color: '#3B5BDB',
+    timeSlot: 'evening',
+    availableSlots: [],
+    active: true,
+    skills: application.subjects || [],
+    coverImage: '',
+    totalHours: 0,
+    totalStudents: 0,
+    scheduleSlots: [],
+    selectedSlots: [],
+    declineCount: 0
+  });
+
+  return tutorRow;
+};
 
 export const createApplication = async (req, res) => {
   const body = req.body || {};
@@ -41,11 +88,13 @@ export const patchApplicationStatus = async (req, res) => {
   }
 
   const application = mapApplication(updated);
+  let tutor = null;
   if (application.status === 'approved') {
     await addActivity('application', 'Đăng ký gia sư được duyệt', application.name);
+    tutor = await promoteApplicationToTutor(application);
   }
 
-  sendSuccess(res, { application }, 'Cập nhật đăng ký thành công');
+  sendSuccess(res, { application, tutor: tutor ? { id: tutor.id, name: tutor.name, initials: tutor.initials } : null }, 'Cập nhật đăng ký thành công');
 };
 
 export const deleteAdminApplication = async (req, res) => {

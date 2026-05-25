@@ -199,7 +199,7 @@ router.post('/wallet/topup', authenticate, wrap(topupController));
 
 router.post('/wallet/withdraw', authenticate, wrap(withdrawController));
 
-router.get('/tutor/profile', wrap(getTutorProfile));
+router.get('/tutor/profile', authenticate, wrap(getTutorProfile));
 
 router.patch('/tutor/profile', authenticate, authorize('tutor'), wrap(patchTutorProfile));
 

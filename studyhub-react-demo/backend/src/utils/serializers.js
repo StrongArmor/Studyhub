@@ -29,7 +29,14 @@ export const mapTutor = (row) => ({
   color: row.color,
   timeSlot: row.time_slot,
   availableSlots: parseJson(row.available_slots_json, []),
-  active: Boolean(row.active)
+  active: Boolean(row.active),
+  skills: parseJson(row.skills_json, []),
+  coverImage: row.cover_image ?? '',
+  totalHours: row.total_hours ?? 0,
+  totalStudents: row.total_students ?? 0,
+  scheduleSlots: parseJson(row.schedule_slots_json, []),
+  selectedSlots: parseJson(row.selected_slots_json, []),
+  declineCount: row.decline_count ?? 0
 });
 
 export const mapUser = (row) => ({
@@ -112,17 +119,17 @@ export const mapWalletTransaction = (row) => ({
 });
 
 export const mapTutorProfile = (row, certificates = [], documents = []) => ({
-  bio: row.bio,
-  skills: parseJson(row.skills_json, []),
+  bio: row?.bio ?? '',
+  skills: parseJson(row?.skills_json, []),
   certificates,
   documents,
-  coverImage: row.cover_image ?? '',
-  totalHours: row.total_hours,
-  totalStudents: row.total_students,
-  rating: row.rating,
-  scheduleSlots: parseJson(row.schedule_slots_json, []),
-  selectedSlots: parseJson(row.selected_slots_json, []),
-  declineCount: row.decline_count
+  coverImage: row?.cover_image ?? '',
+  totalHours: row?.total_hours ?? 0,
+  totalStudents: row?.total_students ?? 0,
+  rating: row?.rating ?? 0,
+  scheduleSlots: parseJson(row?.schedule_slots_json, []),
+  selectedSlots: parseJson(row?.selected_slots_json, []),
+  declineCount: row?.decline_count ?? 0
 });
 
 export const mapCertificate = (row) => ({

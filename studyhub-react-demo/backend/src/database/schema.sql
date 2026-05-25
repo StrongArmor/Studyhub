@@ -37,8 +37,18 @@ CREATE TABLE IF NOT EXISTS tutors (
   color TEXT,
   time_slot TEXT,
   available_slots_json TEXT NOT NULL,
-  active BOOLEAN NOT NULL DEFAULT TRUE
+  active BOOLEAN NOT NULL DEFAULT TRUE,
+  skills_json TEXT NOT NULL DEFAULT '[]',
+  cover_image TEXT NOT NULL DEFAULT '',
+  total_hours INTEGER NOT NULL DEFAULT 0,
+  total_students INTEGER NOT NULL DEFAULT 0,
+  schedule_slots_json TEXT NOT NULL DEFAULT '[]',
+  selected_slots_json TEXT NOT NULL DEFAULT '[]',
+  decline_count INTEGER NOT NULL DEFAULT 0
 );
+
+ALTER TABLE IF EXISTS tutors
+  ADD CONSTRAINT uq_tutors_user UNIQUE (user_id);
 
 ALTER TABLE IF EXISTS tutors
   ADD CONSTRAINT fk_tutors_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
@@ -123,22 +133,6 @@ CREATE TABLE IF NOT EXISTS wallet_transactions (
   time TEXT NOT NULL,
   created_at TEXT NOT NULL
 );
-
-CREATE TABLE IF NOT EXISTS tutor_profile (
-  user_id INTEGER PRIMARY KEY,
-  bio TEXT NOT NULL,
-  skills_json TEXT NOT NULL,
-  cover_image TEXT,
-  total_hours INTEGER NOT NULL,
-  total_students INTEGER NOT NULL,
-  rating REAL NOT NULL,
-  schedule_slots_json TEXT NOT NULL,
-  selected_slots_json TEXT NOT NULL,
-  decline_count INTEGER NOT NULL
-);
-
-ALTER TABLE IF EXISTS tutor_profile
-  ADD CONSTRAINT fk_tutor_profile_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS tutor_certificates (
   id BIGSERIAL PRIMARY KEY,

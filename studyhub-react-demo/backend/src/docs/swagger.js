@@ -24,7 +24,6 @@ export const swaggerSpec = {
     { name: 'System' },
     { name: 'Discovery' },
     { name: 'Bookings' },
-    { name: 'Wallet' },
     { name: 'Tutor Profile' },
     { name: 'Auth' },
     { name: 'Applications' },
@@ -177,6 +176,7 @@ export const swaggerSpec = {
       get: {
         tags: ['Tutor Profile'],
         summary: 'Get tutor profile',
+        security: [{ bearerAuth: [] }],
         responses: {
           200: { description: 'Tutor profile' }
         }

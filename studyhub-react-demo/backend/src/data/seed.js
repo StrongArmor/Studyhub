@@ -6,12 +6,12 @@ const seedUsers = [
 ];
 
 const seedTutors = [
-  { name: 'Nguyễn Minh Anh', initials: 'NMA', subjects: ['Toán học', 'Vật lý'], rating: 4.9, reviews: 127, price: 150000, sessions: 856, status: 'Online', bio: 'Giáo viên Toán - Lý với 8 năm kinh nghiệm.', desc: 'Giáo viên Toán - Lý với 8 năm kinh nghiệm. Chuyên ôn thi THPT Quốc gia và luyện thi.', color: '#3B5BDB', timeSlot: 'evening', availableSlots: ['2026-05-08_19:00', '2026-05-08_20:00', '2026-05-09_19:00', '2026-05-10_20:00'], active: 1 },
-  { name: 'Trần Hải Đăng', initials: 'THĐ', subjects: ['Tiếng Anh', 'IELTS'], rating: 5.0, reviews: 93, price: 200000, sessions: 542, status: 'Online', bio: 'IELTS 8.5 - Chuyên Speaking & Writing.', desc: 'IELTS 8.5 - Chuyên luyện thi IELTS Speaking & Writing.', color: '#7C3AED', timeSlot: 'evening', availableSlots: ['2026-05-08_20:00', '2026-05-09_20:00', '2026-05-10_20:00', '2026-05-11_19:00'], active: 1 },
-  { name: 'Lê Thu Hà', initials: 'LTH', subjects: ['Hóa học', 'Sinh học'], rating: 4.8, reviews: 68, price: 120000, sessions: 423, status: 'Offline', bio: 'Giảng viên Hóa - Sinh.', desc: 'Giảng viên Hóa - Sinh, chuyên ôn thi THPT và luyện thi Y Dược.', color: '#E64980', timeSlot: 'morning', availableSlots: ['2026-05-08_09:00', '2026-05-09_10:00', '2026-05-10_09:00', '2026-05-11_10:00'], active: 1 },
-  { name: 'Phạm Quốc Khánh', initials: 'PQK', subjects: ['Lập trình Python', 'Data Science'], rating: 4.9, reviews: 156, price: 250000, sessions: 672, status: 'Online', bio: 'Senior Data Scientist.', desc: 'Senior Data Scientist. Dạy Python từ cơ bản đến nâng cao.', color: '#0C8599', timeSlot: 'evening', availableSlots: ['2026-05-08_18:00', '2026-05-09_19:00', '2026-05-10_20:00', '2026-05-11_20:00'], active: 1 },
-  { name: 'Hoàng Lan Anh', initials: 'HLA', subjects: ['Tiếng Trung', 'HSK'], rating: 4.7, reviews: 45, price: 180000, sessions: 234, status: 'Offline', bio: 'Tốt nghiệp Đại học Bắc Kinh.', desc: 'Tốt nghiệp Đại học Bắc Kinh. Chuyên luyện thi HSK và giao tiếp thực tế.', color: '#F59F00', timeSlot: 'morning', availableSlots: ['2026-05-08_08:00', '2026-05-09_09:00', '2026-05-10_08:00', '2026-05-11_09:00'], active: 1 },
-  { name: 'Đỗ Minh Tuấn', initials: 'ĐMT', subjects: ['Web Development', 'Lập trình Java'], rating: 4.8, reviews: 89, price: 220000, sessions: 445, status: 'Online', bio: 'Full-stack Developer.', desc: 'Full-stack Developer 7 năm. Dạy React, Node.js, Spring Boot.', color: '#2F9E44', timeSlot: 'afternoon', availableSlots: ['2026-05-08_14:00', '2026-05-09_15:00', '2026-05-10_14:00', '2026-05-11_16:00'], active: 1 }
+  { name: 'Nguyễn Minh Anh', initials: 'NMA', subjects: ['Toán học', 'Vật lý'], rating: 4.9, reviews: 127, price: 150000, sessions: 856, status: 'Online', bio: 'Giáo viên Toán - Lý với 8 năm kinh nghiệm.', desc: 'Giáo viên Toán - Lý với 8 năm kinh nghiệm. Chuyên ôn thi THPT Quốc gia và luyện thi.', color: '#3B5BDB', timeSlot: 'evening', availableSlots: ['2026-05-08_19:00', '2026-05-08_20:00', '2026-05-09_19:00', '2026-05-10_20:00'], active: 1, skills: ['Toán học cơ bản', 'Toán học nâng cao'], coverImage: '', totalHours: 856, totalStudents: 127, scheduleSlots: [], selectedSlots: [], declineCount: 0 },
+  { name: 'Trần Hải Đăng', initials: 'THĐ', subjects: ['Tiếng Anh', 'IELTS'], rating: 5.0, reviews: 93, price: 200000, sessions: 542, status: 'Online', bio: 'IELTS 8.5 - Chuyên Speaking & Writing.', desc: 'IELTS 8.5 - Chuyên luyện thi IELTS Speaking & Writing.', color: '#7C3AED', timeSlot: 'evening', availableSlots: ['2026-05-08_20:00', '2026-05-09_20:00', '2026-05-10_20:00', '2026-05-11_19:00'], active: 1, skills: ['Speaking', 'Writing'], coverImage: '', totalHours: 542, totalStudents: 93, scheduleSlots: [], selectedSlots: [], declineCount: 0 },
+  { name: 'Lê Thu Hà', initials: 'LTH', subjects: ['Hóa học', 'Sinh học'], rating: 4.8, reviews: 68, price: 120000, sessions: 423, status: 'Offline', bio: 'Giảng viên Hóa - Sinh.', desc: 'Giảng viên Hóa - Sinh, chuyên ôn thi THPT và luyện thi Y Dược.', color: '#E64980', timeSlot: 'morning', availableSlots: ['2026-05-08_09:00', '2026-05-09_10:00', '2026-05-10_09:00', '2026-05-11_10:00'], active: 1, skills: ['Hóa học', 'Sinh học'], coverImage: '', totalHours: 423, totalStudents: 68, scheduleSlots: [], selectedSlots: [], declineCount: 0 },
+  { name: 'Phạm Quốc Khánh', initials: 'PQK', subjects: ['Lập trình Python', 'Data Science'], rating: 4.9, reviews: 156, price: 250000, sessions: 672, status: 'Online', bio: 'Senior Data Scientist.', desc: 'Senior Data Scientist. Dạy Python từ cơ bản đến nâng cao.', color: '#0C8599', timeSlot: 'evening', availableSlots: ['2026-05-08_18:00', '2026-05-09_19:00', '2026-05-10_20:00', '2026-05-11_20:00'], active: 1, skills: ['Python', 'Data Science'], coverImage: '', totalHours: 672, totalStudents: 156, scheduleSlots: [], selectedSlots: [], declineCount: 0 },
+  { name: 'Hoàng Lan Anh', initials: 'HLA', subjects: ['Tiếng Trung', 'HSK'], rating: 4.7, reviews: 45, price: 180000, sessions: 234, status: 'Offline', bio: 'Tốt nghiệp Đại học Bắc Kinh.', desc: 'Tốt nghiệp Đại học Bắc Kinh. Chuyên luyện thi HSK và giao tiếp thực tế.', color: '#F59F00', timeSlot: 'morning', availableSlots: ['2026-05-08_08:00', '2026-05-09_09:00', '2026-05-10_08:00', '2026-05-11_09:00'], active: 1, skills: ['Tiếng Trung', 'HSK'], coverImage: '', totalHours: 234, totalStudents: 45, scheduleSlots: [], selectedSlots: [], declineCount: 0 },
+  { name: 'Đỗ Minh Tuấn', initials: 'ĐMT', subjects: ['Web Development', 'Lập trình Java'], rating: 4.8, reviews: 89, price: 220000, sessions: 445, status: 'Online', bio: 'Full-stack Developer.', desc: 'Full-stack Developer 7 năm. Dạy React, Node.js, Spring Boot.', color: '#2F9E44', timeSlot: 'afternoon', availableSlots: ['2026-05-08_14:00', '2026-05-09_15:00', '2026-05-10_14:00', '2026-05-11_16:00'], active: 1, skills: ['React', 'Node.js', 'Spring Boot'], coverImage: '', totalHours: 445, totalStudents: 89, scheduleSlots: [], selectedSlots: [], declineCount: 0 }
 ];
 
 const seedBookings = [
@@ -49,18 +49,6 @@ const seedWallet = {
   ]
 };
 
-const seedTutorProfile = {
-  bio: 'Tôi là một gia sư tận tâm với 8 năm kinh nghiệm giảng dạy. Chuyên ôn thi THPT Quốc gia và luyện thi học sinh giỏi.',
-  skills: ['Toán học cơ bản', 'Toán học nâng cao', 'Ôn thi THPT', 'Luyện thi học sinh giỏi'],
-  coverImage: '',
-  totalHours: 856,
-  totalStudents: 127,
-  rating: 4.9,
-  scheduleSlots: [],
-  selectedSlots: [],
-  declineCount: 0
-};
-
 const hashPassword = (password) => bcrypt.hash(password, 10);
 
 export const seedDatabase = async (db) => {
@@ -87,8 +75,8 @@ export const seedDatabase = async (db) => {
       const userRes = await db.query('INSERT INTO users (email, password, role, name, status) VALUES ($1, $2, $3, $4, $5) RETURNING id', [tutorEmail, tutorPassword, 'tutor', tutor.name, 'active']);
       const userId = userRes.rows[0] ? userRes.rows[0].id : null;
       await db.query(
-        'INSERT INTO tutors (user_id, name, initials, subjects_json, rating, reviews, price, sessions, status, bio, "desc", color, time_slot, available_slots_json, active) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
-        [userId, tutor.name, tutor.initials, JSON.stringify(tutor.subjects), tutor.rating, tutor.reviews, tutor.price, tutor.sessions, tutor.status, tutor.bio, tutor.desc, tutor.color, tutor.timeSlot, JSON.stringify(tutor.availableSlots), Boolean(tutor.active)]
+        'INSERT INTO tutors (user_id, name, initials, subjects_json, rating, reviews, price, sessions, status, bio, "desc", color, time_slot, available_slots_json, active, skills_json, cover_image, total_hours, total_students, schedule_slots_json, selected_slots_json, decline_count) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)',
+        [userId, tutor.name, tutor.initials, JSON.stringify(tutor.subjects), tutor.rating, tutor.reviews, tutor.price, tutor.sessions, tutor.status, tutor.bio, tutor.desc, tutor.color, tutor.timeSlot, JSON.stringify(tutor.availableSlots), Boolean(tutor.active), JSON.stringify(tutor.skills || []), tutor.coverImage || '', tutor.totalHours || 0, tutor.totalStudents || 0, JSON.stringify(tutor.scheduleSlots || []), JSON.stringify(tutor.selectedSlots || []), tutor.declineCount || 0]
       );
       idx += 1;
     }
@@ -149,33 +137,9 @@ export const seedDatabase = async (db) => {
     }
   });
 
-  await runIfEmpty('tutor_profile', async () => {
-    // attach profile to the demo tutor user if exists
-    const tutorRes = await db.query('SELECT id FROM users WHERE email = $1 LIMIT 1', ['tutor1@studyhub.vn']);
-    const tutorId = tutorRes.rows[0] ? tutorRes.rows[0].id : 1;
-    await db.query(
-      'INSERT INTO tutor_profile (user_id, bio, skills_json, cover_image, total_hours, total_students, rating, schedule_slots_json, selected_slots_json, decline_count) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
-      [tutorId, seedTutorProfile.bio, JSON.stringify(seedTutorProfile.skills), seedTutorProfile.coverImage, seedTutorProfile.totalHours, seedTutorProfile.totalStudents, seedTutorProfile.rating, JSON.stringify(seedTutorProfile.scheduleSlots), JSON.stringify(seedTutorProfile.selectedSlots), seedTutorProfile.declineCount]
-    );
-  });
-
   await runIfEmpty('tutor_certificates', async () => {
-    if (seedTutorProfile.certificates) {
-      for (const certificate of seedTutorProfile.certificates) {
-        const tutorRes = await db.query('SELECT id FROM users WHERE email = $1 LIMIT 1', ['tutor1@studyhub.vn']);
-        const tutorId = tutorRes.rows[0] ? tutorRes.rows[0].id : null;
-        await db.query('INSERT INTO tutor_certificates (user_id, name, url, issued_at) VALUES ($1, $2, $3, $4)', [tutorId, certificate.name, certificate.url, certificate.issuedAt]);
-      }
-    }
   });
 
   await runIfEmpty('tutor_documents', async () => {
-    if (seedTutorProfile.documents) {
-      for (const document of seedTutorProfile.documents) {
-        const tutorRes = await db.query('SELECT id FROM users WHERE email = $1 LIMIT 1', ['tutor1@studyhub.vn']);
-        const tutorId = tutorRes.rows[0] ? tutorRes.rows[0].id : null;
-        await db.query('INSERT INTO tutor_documents (user_id, name, url, uploaded_at) VALUES ($1, $2, $3, $4)', [tutorId, document.name, document.url, document.uploadedAt]);
-      }
-    }
   });
 };
