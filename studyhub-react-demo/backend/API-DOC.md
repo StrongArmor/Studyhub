@@ -1,509 +1,438 @@
-# StudyHub Frontend API Doc
+# StudyHub API Documentation
 
-Tài liệu này được viết từ mock data và state hiện có trong frontend, để frontend có thể thay dần dữ liệu demo bằng API thật.
+Backend chạy tại `http://localhost:4000`. Frontend proxy Vite trỏ `/api` → `http://localhost:4000`, nên FE gọi `/api/...` là được.
 
-## 1. Nguồn mock data hiện tại
+---
 
-Các nguồn dữ liệu demo chính đang nằm trong:
+## Response envelope
 
-- `src/store/AppContext.jsx`
-- `src/hooks/index.js`
-- `src/components/home/index.jsx`
-- `src/components/tutors/index.jsx`
-- `src/components/dashboard/index.jsx`
-- `src/components/booking/index.jsx`
-- `src/components/wallet/index.jsx`
-- `src/components/admin/index.jsx`
-- `src/components/auth/index.jsx`
-
-Frontend hiện đang render dữ liệu từ state nội bộ, chưa gọi API thật.
-
-## 2. Data models dùng trong frontend
-
-### 2.1 User / Auth user
-
-```ts
-{
-  email: string;
-  password?: string; // chỉ mock/local
-  role: 'user' | 'tutor' | 'admin';
-  name: string;
-  status?: 'active' | 'blocked';
-  avatar?: string;
-}
-```
-
-### 2.2 Tutor
-
-Mock hiện có cả trường backend và trường UI-only:
-
-```ts
-{
-  id: number;
-  name: string;
-  initials: string;
-  subjects: string[];
-  rating: number;
-  reviews: number;
-  price: number;
-  sessions: number;
-  status: 'Online' | 'Offline';
-  bio?: string;
-  desc?: string;        // UI-only
-  color?: string;       // UI-only
-  timeSlot?: 'morning' | 'afternoon' | 'evening';
-  availableSlots?: string[]; // UI-only, dùng cho booking demo
-  active?: boolean;
-}
-```
-
-### 2.3 Booking
-
-```ts
-{
-  id: number;
-  tutorName: string;
-  tutorInitials?: string;
-  tutorColor?: string;
-  subject: string;
-  date: string;     // YYYY-MM-DD
-  time: string;     // HH:mm
-  duration: number;
-  price: number;
-  status: 'confirmed' | 'completed' | 'cancelled';
-}
-```
-
-### 2.4 Application / tutor registration
-
-```ts
-{
-  id: number;
-  name: string;
-  email: string;
-  phone?: string;
-  subjects: string[];
-  education?: string;
-  experience?: string;
-  price?: number | string;
-  bio?: string;
-  status: 'pending' | 'approved' | 'rejected';
-  createdAt: string;
-}
-```
-
-### 2.5 Activity
-
-```ts
-{
-  id: number;
-  type: "booking" | "application" | "user" | "report";
-  title: string;
-  detail: string;
-  time: string;
-}
-```
-
-### 2.6 Admin stats
-
-```ts
-{
-  totalUsers: number;
-  activeTutors: number;
-  pendingApplications: number;
-  todayRevenue: number;
-  totalBookings: number;
-  onlineTutors: number;
-  approvalRate: number;
-  avgRating: number;
-}
-```
-
-### 2.7 Wallet / withdraw state
-
-Đây hiện là mock-only, chưa có API backend tương ứng:
-
-```ts
-{
-  balance: number;
-  topup: string;
-  selectedBank: string;
-  banks: string[];
-  transactions: Array<{
-    id: number;
-    label: string;
-    amount: number;
-    type: 'in' | 'out';
-    time: string;
-  }>;
-}
-```
-
-## 3. API hiện có ở backend
-
-Proxy đang trỏ `/api` sang `http://localhost:4000` trong `vite.config.js`.
-
-### 3.1 Health / reference
-
-#### GET `/api/health`
-
-Response:
+Mọi response đều theo cấu trúc:
 
 ```json
 {
-  "ok": true,
-  "service": "StudyHub API",
-  "timestamp": "2026-05-24T00:00:00.000Z"
+  "success": true,
+  "message": "Lấy dữ liệu thành công",
+  "data": { ... },
+  "errors": null,
+  "meta": { "timestamp": "2026-05-30T00:00:00.000Z" }
 }
 ```
 
-#### GET `/api/subjects`
-
-Response:
+Khi lỗi:
 
 ```json
 {
-  "subjects": ["Toán học", "Vật lý"]
+  "success": false,
+  "message": "Email hoặc mật khẩu không đúng",
+  "data": null,
+  "errors": null,
+  "meta": { "timestamp": "..." }
 }
 ```
 
-### 3.2 Home / discovery
+Các ví dụ bên dưới chỉ show phần `data`.
 
-#### GET `/api/dashboard`
+---
 
-Used by: home page, dashboard summary.
+## Auth
 
-Response:
+### POST `/api/login`
+
+Body:
+
+```json
+{ "email": "user@studyhub.vn", "password": "12345678" }
+```
+
+`data`:
 
 ```json
 {
-  "stats": {
-    "tutors": 6,
-    "bookings": 3,
-    "onlineNow": 4,
-    "applications": 3
-  },
-  "featuredTutors": [
-    {
-      "id": 1,
-      "name": "Nguyễn Minh Anh",
-      "initials": "NMA",
-      "subjects": ["Toán học", "Vật lý"],
-      "rating": 4.9,
-      "reviews": 127,
-      "price": 150000,
-      "sessions": 856,
-      "status": "Online",
-      "bio": "Giáo viên Toán - Lý với 8 năm kinh nghiệm."
-    }
-  ],
-  "bookings": [],
-  "applications": []
+  "access_token": "eyJ...",
+  "user": { "id": 1, "name": "Học viên Demo", "email": "user@studyhub.vn", "role": "user", "status": "active", "avatar": null }
 }
 ```
 
-#### GET `/api/tutors?search=&subject=&minRating=&maxPrice=`
+Errors: `401` email/mật khẩu sai — `403` tài khoản bị khóa.
 
-Used by: tutor list page.
+---
 
-Response:
+### POST `/api/register`
+
+Body:
+
+```json
+{ "name": "Nguyễn Văn A", "email": "a@example.com", "password": "12345678" }
+```
+
+`data`:
+
+```json
+{
+  "token": "eyJ...",
+  "user": { "id": 5, "name": "Nguyễn Văn A", "email": "a@example.com", "role": "user" }
+}
+```
+
+Errors: `400` thiếu field — `409` email đã tồn tại.
+
+---
+
+### POST `/api/auth/otp/send`
+
+Body: `{ "email": "a@example.com" }`
+
+`data`:
+
+```json
+{ "email": "a@example.com", "code": "482931", "expiresIn": 300 }
+```
+
+> `code` trả về trong response vì đây là demo (không gửi email thật).
+
+---
+
+### POST `/api/auth/otp/verify`
+
+Body: `{ "email": "a@example.com", "otp": "482931" }`
+
+`data`: `null` (chỉ cần `success: true`)
+
+Errors: `401` OTP không hợp lệ hoặc hết hạn.
+
+---
+
+## User
+
+### PATCH `/api/users/me` 🔒
+
+Cập nhật thông tin cá nhân của user đang đăng nhập.
+
+Body (tất cả optional):
+
+```json
+{ "name": "Tên mới", "avatar": "NM" }
+```
+
+`data`:
+
+```json
+{
+  "user": { "id": 1, "name": "Tên mới", "email": "user@studyhub.vn", "role": "user", "status": "active", "avatar": "NM" }
+}
+```
+
+---
+
+## Tutors
+
+### GET `/api/tutors`
+
+Query params: `search`, `subject`, `minRating`, `maxPrice`.
+
+`data`:
 
 ```json
 {
   "tutors": [
-    {
-      "id": 1,
-      "name": "Nguyễn Minh Anh",
-      "initials": "NMA",
-      "subjects": ["Toán học", "Vật lý"],
-      "rating": 4.9,
-      "reviews": 127,
-      "price": 150000,
-      "sessions": 856,
-      "status": "Online",
-      "bio": "Giáo viên Toán - Lý với 8 năm kinh nghiệm."
-    }
+    { "id": 1, "name": "Nguyễn Minh Anh", "initials": "NMA", "subjects": ["Toán học", "Vật lý"], "rating": 4.9, "reviews": 127, "price": 150000, "sessions": 856, "status": "Online", "bio": "..." }
   ]
 }
 ```
 
-Query contract:
+---
 
-- `search`: text search theo tên hoặc môn học.
-- `subject`: lọc theo môn học.
-- `minRating`: lọc rating tối thiểu.
-- `maxPrice`: lọc giá tối đa.
+### GET `/api/subjects`
 
-### 3.3 Booking / dashboard
+`data`: `{ "subjects": ["IELTS", "Toán học", "Vật lý"] }`
 
-#### GET `/api/bookings`
+---
 
-Response:
+## Tutor profile
+
+### GET `/api/tutor/profile` 🔒
+
+`data`:
+
+```json
+{
+  "profile": {
+    "bio": "...",
+    "skills": ["Toán cơ bản", "Ôn thi THPT"],
+    "certificates": [{ "id": 1, "name": "Chứng chỉ A", "url": "#", "issuedAt": "2026-01-01T..." }],
+    "documents": [],
+    "coverImage": "",
+    "totalHours": 856,
+    "totalStudents": 127,
+    "rating": 4.9,
+    "scheduleSlots": [],
+    "selectedSlots": [],
+    "declineCount": 0
+  }
+}
+```
+
+---
+
+### PATCH `/api/tutor/profile` 🔒 (role: tutor)
+
+Body (tất cả optional):
+
+```json
+{
+  "bio": "Giới thiệu mới",
+  "skills": ["Toán học", "Lý"],
+  "coverImage": "",
+  "totalHours": 900,
+  "totalStudents": 130,
+  "rating": 4.9,
+  "scheduleSlots": [],
+  "selectedSlots": [],
+  "declineCount": 0
+}
+```
+
+`data`: `{ "profile": { ... } }` (same shape as GET)
+
+---
+
+### POST `/api/tutor/profile/certificates` 🔒 (role: tutor)
+
+Body: `{ "name": "Chứng chỉ B", "url": "#", "issuedAt": "2026-01-01" }`
+
+`data`: `{ "certificate": { "id": 2, ... } }`
+
+---
+
+### POST `/api/tutor/profile/documents` 🔒 (role: tutor)
+
+Body: `{ "name": "Tài liệu C", "url": "#" }`
+
+`data`: `{ "document": { "id": 3, ... } }`
+
+---
+
+## Bookings
+
+### GET `/api/bookings`
+
+`data`:
 
 ```json
 {
   "bookings": [
-    {
-      "id": 1,
-      "tutor": "Nguyễn Minh Anh",
-      "subject": "Toán học",
-      "date": "2026-05-08",
-      "time": "19:00",
-      "duration": 45,
-      "price": 150000,
-      "status": "confirmed"
-    }
+    { "id": 1, "tutorName": "Nguyễn Minh Anh", "subject": "Toán học", "date": "2026-05-08", "time": "19:00", "duration": 45, "price": 150000, "status": "confirmed" }
   ]
 }
 ```
 
-### 3.4 Auth
+---
 
-#### POST `/api/login`
-
-Body:
-
-```json
-{
-  "email": "user@studyhub.vn",
-  "password": "12345678"
-}
-```
-
-Success response:
-
-```json
-{
-  "ok": true,
-  "user": {
-    "email": "user@studyhub.vn",
-    "name": "Học viên Demo",
-    "role": "user"
-  }
-}
-```
-
-Error response:
-
-```json
-{
-  "ok": false,
-  "message": "Email hoặc mật khẩu không đúng"
-}
-```
-
-#### POST `/api/register`
+### POST `/api/bookings` 🔒
 
 Body:
 
 ```json
-{
-  "name": "Nguyễn Văn A",
-  "email": "a@example.com",
-  "password": "12345678",
-  "role": "user"
-}
+{ "tutorId": 1, "subject": "Toán học", "date": "2026-05-20", "time": "19:00", "duration": 45, "price": 150000 }
 ```
 
-Success response:
+`data`: `{ "booking": { ... } }`
 
-```json
-{
-  "ok": true,
-  "user": {
-    "name": "Nguyễn Văn A",
-    "email": "a@example.com",
-    "role": "user"
-  }
-}
-```
+---
 
-Error responses:
+### PATCH `/api/bookings/:id/cancel` 🔒
 
-```json
-{ "ok": false, "message": "Thiếu thông tin đăng ký" }
-```
+`data`: `{ "booking": { "id": 1, "status": "cancelled" } }`
 
-```json
-{ "ok": false, "message": "Email đã tồn tại" }
-```
+---
 
-### 3.5 Tutor application
+### POST `/api/bookings/:id/reviews` 🔒
 
-#### POST `/api/applications`
+Body: `{ "rating": 5, "comment": "Rất tốt!" }`
+
+`data`: `{ "booking": { ... } }`
+
+---
+
+## Reports
+
+### POST `/api/reports` 🔒
 
 Body:
 
 ```json
-{
-  "name": "Lê Minh Khoa",
-  "email": "khoa@example.com",
-  "phone": "0909000001",
-  "subjects": ["Toán học", "Vật lý"],
-  "education": "ĐH Bách Khoa",
-  "experience": "3 năm luyện thi THPT",
-  "price": 180000,
-  "bio": "Tập trung vào nền tảng và luyện đề"
-}
+{ "bookingId": 1, "tutorName": "Nguyễn Minh Anh", "issue": "quality", "detail": "Nội dung không đúng cam kết" }
 ```
 
-Success response:
+`data`: `{ "report": { "id": 2, "status": "pending", ... } }`
+
+---
+
+## Wallet
+
+### GET `/api/wallet` 🔒
+
+`data`:
 
 ```json
 {
-  "ok": true,
-  "application": {
-    "id": 4,
-    "name": "Lê Minh Khoa",
-    "email": "khoa@example.com",
-    "phone": "0909000001",
-    "subjects": ["Toán học", "Vật lý"],
-    "education": "ĐH Bách Khoa",
-    "experience": "3 năm luyện thi THPT",
-    "price": 180000,
-    "bio": "Tập trung vào nền tảng và luyện đề",
-    "createdAt": "2026-05-24T00:00:00.000Z",
-    "status": "pending"
+  "wallet": {
+    "balance": 7250000,
+    "topup": "500000",
+    "selectedBank": "VCB **** 2891",
+    "banks": ["VCB **** 2891", "MB **** 1122"],
+    "transactions": [
+      { "id": 1, "label": "Nạp tiền", "amount": 500000, "type": "in", "time": "Vừa xong", "createdAt": "2026-05-30T..." }
+    ]
   }
 }
 ```
 
-### 3.6 Admin
+---
 
-#### GET `/api/admin/overview`
+### POST `/api/wallet/topup` 🔒
 
-Response:
+Body: `{ "amount": 500000, "bank": "VCB **** 2891" }`
+
+`data`:
 
 ```json
 {
-  "stats": {
-    "totalUsers": 3,
-    "activeTutors": 1,
-    "pendingApplications": 1,
-    "todayRevenue": 12400000,
-    "totalBookings": 3,
-    "onlineTutors": 4,
-    "approvalRate": 33,
-    "avgRating": 4.87
-  },
+  "wallet": { "balance": 7750000, "topup": "500000", "selectedBank": "VCB **** 2891", "banks": [...], "transactions": [...] },
+  "transaction": { "id": 4, "label": "Nạp tiền", "amount": 500000, "type": "in", "time": "Vừa xong", "createdAt": "..." }
+}
+```
+
+---
+
+### POST `/api/wallet/withdraw` 🔒
+
+Body: `{ "amount": 1000000, "bank": "VCB **** 2891" }`
+
+`data`:
+
+```json
+{
+  "wallet": { "balance": 6250000, "topup": "500000", "selectedBank": "VCB **** 2891", "banks": [...], "transactions": [...] },
+  "transaction": { "id": 5, "label": "Rút tiền về ngân hàng", "amount": 1000000, "type": "out", "time": "Vừa xong", "createdAt": "..." }
+}
+```
+
+Errors: `400` số dư không đủ.
+
+---
+
+## Dashboard summary
+
+### GET `/api/dashboard`
+
+`data`:
+
+```json
+{
+  "stats": { "tutors": 6, "bookings": 3, "onlineNow": 4, "applications": 2 },
+  "featuredTutors": [...],
+  "bookings": [...],
+  "applications": [...]
+}
+```
+
+---
+
+## Admin (🔒 role: admin)
+
+### GET `/api/admin/overview`
+
+`data`:
+
+```json
+{
+  "stats": { "totalUsers": 3, "activeTutors": 1, "pendingApplications": 1, "todayRevenue": 12400000, "totalBookings": 3, "onlineTutors": 4, "approvalRate": 33, "avgRating": 4.87 },
   "revenueSeries": [{ "label": "T2", "value": 8.2 }],
   "bookingStatus": [{ "label": "Đã xác nhận", "value": 52 }],
   "activities": []
 }
 ```
 
-#### GET `/api/admin/users`
+---
 
-Response:
+### GET `/api/admin/users`
 
-```json
-{
-  "users": [
-    {
-      "email": "user@studyhub.vn",
-      "role": "user",
-      "name": "Học viên Demo",
-      "status": "active"
-    }
-  ]
-}
+`data`: `{ "users": [{ "id": 1, "name": "...", "email": "...", "role": "user", "status": "active" }] }`
+
+---
+
+### GET `/api/admin/tutors`
+
+`data`: `{ "tutors": [...] }`
+
+---
+
+### GET `/api/admin/applications`
+
+`data`: `{ "applications": [...] }`
+
+---
+
+### GET `/api/admin/reports`
+
+`data`: `{ stats, revenueSeries, bookingStatus, activities, applications, users, tutors }`
+
+---
+
+### PATCH `/api/admin/applications/:id`
+
+Body: `{ "status": "approved" }`
+
+`data`: `{ "application": { ... } }`
+
+---
+
+### PATCH `/api/admin/users/:email/status`
+
+Body: `{ "status": "blocked" }`
+
+`data`: `{ "user": { "email": "...", "status": "blocked" } }`
+
+---
+
+## 🔒 Authentication
+
+Các endpoint có 🔒 yêu cầu header:
+
+```
+Authorization: Bearer <access_token>
 ```
 
-#### GET `/api/admin/tutors`
+Token lấy từ response của `/api/login` hoặc `/api/register`, hết hạn sau 7 ngày.
 
-Response: `{ "tutors": Tutor[] }`
+---
 
-#### GET `/api/admin/applications`
+## Trạng thái tích hợp FE ↔ BE
 
-Response: `{ "applications": Application[] }`
+| Feature | Endpoint | FE wired? |
+|---|---|---|
+| Đăng nhập | `POST /login` | ✅ |
+| Đăng ký + OTP | `POST /auth/otp/send` + `POST /auth/otp/verify` + `POST /register` | ✅ |
+| Nạp tiền | `POST /wallet/topup` | ✅ |
+| Rút tiền | `POST /wallet/withdraw` | ✅ |
+| Sửa tên (student) | `PATCH /users/me` | ✅ |
+| Sửa bio (tutor) | `PATCH /tutor/profile` | ✅ |
+| Tạo booking | `POST /bookings` | ❌ mock |
+| Hủy booking | `PATCH /bookings/:id/cancel` | ❌ mock |
+| Đánh giá | `POST /bookings/:id/reviews` | ❌ mock |
+| Báo cáo | `POST /reports` | ❌ mock |
+| Load wallet | `GET /wallet` | ❌ mock (chỉ đọc từ state) |
+| Tutor profile load | `GET /tutor/profile` | ❌ mock |
+| Upload chứng chỉ | `POST /tutor/profile/certificates` | ❌ mock |
+| Admin panel | `GET /admin/*` | ❌ mock |
 
-#### GET `/api/admin/reports`
+---
 
-Response: `{ stats, revenueSeries, bookingStatus, activities, applications, users, tutors }`
+## Demo accounts
 
-#### GET `/api/admin/activities`
-
-Response: `{ "activities": Activity[] }`
-
-#### PATCH `/api/admin/applications/:id`
-
-Body:
-
-```json
-{ "status": "approved" }
-```
-
-Response:
-
-```json
-{
-  "ok": true,
-  "application": {}
-}
-```
-
-#### PATCH `/api/admin/users/:email/status`
-
-Body:
-
-```json
-{ "status": "blocked" }
-```
-
-Response:
-
-```json
-{
-  "ok": true,
-  "user": {
-    "email": "user@studyhub.vn",
-    "name": "Học viên Demo",
-    "role": "user",
-    "status": "blocked"
-  }
-}
-```
-
-## 4. API còn đang mock ở frontend nhưng chưa có backend
-
-Các màn hình dưới đây đang dùng state nội bộ và hiện chưa có endpoint thật:
-
-- Booking flow: tạo booking, hủy booking, gửi đánh giá, gửi báo cáo/khiếu nại.
-- Wallet: nạp tiền, rút tiền, lưu ngân hàng, lịch sử giao dịch.
-- Tutor profile: upload chứng chỉ/tài liệu, quản lý lịch dạy, duyệt/từ chối slot.
-- OTP flow: gửi OTP, xác thực OTP, resend OTP.
-
-### 4.1 API nên bổ sung nếu muốn bỏ mock hoàn toàn
-
-Đề xuất contract tối thiểu:
-
-- POST `/api/bookings`
-- PATCH `/api/bookings/:id/cancel`
-- POST `/api/bookings/:id/reviews`
-- POST `/api/reports`
-- GET `/api/wallet`
-- POST `/api/wallet/topup`
-- POST `/api/wallet/withdraw`
-- GET `/api/wallet/transactions`
-- GET `/api/tutor/profile`
-- PATCH `/api/tutor/profile`
-- POST `/api/tutor/profile/certificates`
-- POST `/api/tutor/profile/documents`
-- POST `/api/auth/otp/send`
-- POST `/api/auth/otp/verify`
-
-## 5. Frontend screen to API mapping
-
-- Home: `/api/dashboard`, `/api/subjects`
-- Tutor list: `/api/tutors`
-- Student dashboard: `/api/bookings`
-- Auth: `/api/login`, `/api/register`, later thêm OTP endpoints
-- Become tutor: `/api/applications`
-- Admin panel: `/api/admin/overview`, `/api/admin/users`, `/api/admin/tutors`, `/api/admin/applications`, `/api/admin/reports`, `/api/admin/activities`
-- Wallet / booking / tutor profile: hiện vẫn mock, cần bổ sung API ở phần 4.1
-
-## 6. Notes
-
-- Backend hiện đã có CORS và proxy Vite đang trỏ `/api` sang `http://localhost:4000`.
-- Một số field trong UI chỉ là demo, ví dụ `color`, `desc`, `availableSlots`, `transactions`, `otp`.
-- Khi chuyển sang API thật, nên giữ đồng bộ shape giữa backend và `AppContext` để tránh phải map lại quá nhiều ở component.
+| Role | Email | Password |
+|---|---|---|
+| Student | student@studyhub.vn | 12345678 |
+| Tutor | tutor@studyhub.vn | 12345678 |
+| Admin | admin@studyhub.vn | 12345678 |

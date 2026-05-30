@@ -4,40 +4,21 @@ Demo full-stack project for StudyHub using React + Express.
 
 ## Structure
 - `frontend/` — React + Vite UI
-- `backend/` — Express API (port 4000)
+- `backend/` — Express API
 
-## Chạy trên Windows Native
+## Chạy nhanh (Git Bash / WSL)
 
-### Bước 1 — Clone repo
 ```bash
 git clone https://github.com/StrongArmor/Studyhub
 cd Studyhub/studyhub-react-demo
+bash start.sh
 ```
 
-### Bước 2 — Install dependencies
-```bash
-npm install
-```
-> Chạy một lần ở root là đủ (npm workspaces tự hoist dependencies cho cả frontend và backend)
+Mở trình duyệt: **http://localhost:5173**
 
-### Bước 3 — Chạy Backend (port 4000)
-Mở terminal 1:
-```bash
-cd backend
-node server.js
-```
+> `start.sh` tự install dependencies nếu chưa có, start backend (port 4000) ở background và frontend (port 5173) ở foreground. Nhấn `Ctrl+C` để dừng cả hai.
 
-### Bước 4 — Chạy Frontend (port 5173)
-Mở terminal 2:
-```bash
-cd frontend
-npx vite
-```
-
-### Bước 5 — Mở trình duyệt
-```
-http://localhost:5173
-```
+---
 
 ## Demo accounts
 
@@ -54,5 +35,4 @@ http://localhost:5173
 - Tutor application form
 - Mock API endpoints
 
-## Lưu ý
-- Nếu dùng **WSL**, cần `npm install` từ trong WSL (không dùng lại node_modules đã install từ Windows native vì khác native binaries).
+

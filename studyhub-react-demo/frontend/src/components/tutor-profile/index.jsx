@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useApp } from '../../store/AppContext';
+import { api } from '../../services/api';
 import { Navbar, Footer } from '../common';
 import './profile.css';
 
 export function TutorProfilePage() {
-  const { state, dispatch } = useApp();
+  const { state, dispatch, showToast } = useApp();
   const [isEditing, setIsEditing] = useState(false);
   const [editBio, setEditBio] = useState(state.tutorProfile?.bio || '');
 
@@ -45,12 +46,15 @@ export function TutorProfilePage() {
     }
   };
 
-  const handleSaveBio = () => {
-    dispatch({
-      type: 'SET_TUTOR_PROFILE',
-      payload: { bio: editBio }
-    });
-    setIsEditing(false);
+  const handleSaveBio = async () => {
+    try {
+      await api.updateTutorProfile({ bio: editBio });
+      dispatch({ type: 'SET_TUTOR_PROFILE', payload: { bio: editBio } });
+      setIsEditing(false);
+      showToast('Đã lưu giới thiệu', 'success');
+    } catch (err) {
+      showToast(err.message || 'Lưu thất bại', 'error');
+    }
   };
 
   const generateCalendarSlots = () => {

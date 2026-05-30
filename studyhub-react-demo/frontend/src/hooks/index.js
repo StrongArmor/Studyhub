@@ -1,50 +1,76 @@
 import { useMemo } from 'react';
 import { useApp } from '../store/AppContext';
+import { api } from '../services/api';
 
 export function useAuth() {
   const { state, dispatch, navigate, showToast } = useApp();
 
-  const doLogin = (role) => {
-    const { login, authUsers } = state;
+  const avatarFrom = (name) => name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
+
+  const doLogin = async (role) => {
+    const { login } = state;
     const emailKey = role === 'admin' ? 'adminEmail' : role === 'tutor' ? 'tutorEmail' : 'studentEmail';
-    const passKey = role === 'admin' ? 'adminPass' : role === 'tutor' ? 'tutorPass' : 'studentPass';
-    const user = authUsers.find((u) => u.email === login[emailKey] && u.password === login[passKey] && u.role === role);
-    if (!user) return showToast('Email hoặc mật khẩu không đúng', 'error');
-    const token = `studyhub-${role}-${Date.now()}`;
-    dispatch({ type: 'SET_AUTH', payload: { token, user: { ...user, avatar: user.name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase() } } });
-    showToast(`Đăng nhập thành công! Chào mừng ${user.name}`, 'success');
-    setTimeout(() => navigate(role === 'admin' ? 'admin' : 'dashboard'), 600);
+    const passKey  = role === 'admin' ? 'adminPass'  : role === 'tutor' ? 'tutorPass'  : 'studentPass';
+    try {
+      const data = await api.login(login[emailKey], login[passKey]);
+      const user = data.user;
+      dispatch({ type: 'SET_AUTH', payload: { token: data.access_token, user: { ...user, avatar: user.avatar || avatarFrom(user.name) } } });
+      showToast(`Đăng nhập thành công! Chào mừng ${user.name}`, 'success');
+      setTimeout(() => navigate(user.role === 'admin' ? 'admin' : 'dashboard'), 600);
+    } catch (err) {
+      showToast(err.message || 'Email hoặc mật khẩu không đúng', 'error');
+    }
   };
 
-  const doRegister = () => {
+  const doRegister = async () => {
     const { name, email, pass, confirm, agree } = state.register;
     if (!name || !email || !pass || !confirm) return showToast('Vui lòng nhập đầy đủ thông tin', 'error');
     if (pass.length < 8) return showToast('Mật khẩu tối thiểu 8 ký tự', 'error');
     if (pass !== confirm) return showToast('Mật khẩu xác nhận không khớp', 'error');
     if (!agree) return showToast('Vui lòng đồng ý với điều khoản sử dụng', 'error');
-    if (state.authUsers.some((u) => u.email === email)) {
-      dispatch({ type: 'SET_EMAIL_MODAL', payload: { open: true, msg: `Email ${email} đã tồn tại trong hệ thống. Vui lòng đăng nhập hoặc sử dụng email khác.` } });
-      return;
+    try {
+      const otpData = await api.sendOtp(email);
+      dispatch({ type: 'SET_PENDING_USER', payload: { name, email, password: pass } });
+      showToast(`Mã OTP: ${otpData.code} (demo)`, 'success', 10000);
+      navigate('otp');
+    } catch (err) {
+      if (err.message.includes('đã tồn tại')) {
+        dispatch({ type: 'SET_EMAIL_MODAL', payload: { open: true, msg: `Email ${email} đã tồn tại trong hệ thống. Vui lòng đăng nhập hoặc sử dụng email khác.` } });
+      } else {
+        showToast(err.message, 'error');
+      }
     }
-    dispatch({ type: 'SET_PENDING_USER', payload: { name, email, password: pass } });
-    navigate('otp');
   };
 
-  const verifyOTP = () => {
+  const verifyOTP = async () => {
     const { otpDigits, pendingUser } = state;
     if (otpDigits.join('').length < 6) return showToast('Vui lòng nhập đủ 6 chữ số', 'error');
     if (!pendingUser) return;
-    const newUser = { name: pendingUser.name, email: pendingUser.email, password: pendingUser.password, role: 'user' };
-    dispatch({ type: 'ADD_AUTH_USER', payload: newUser });
-    dispatch({ type: 'SET_CURRENT_USER', payload: newUser });
-    showToast(`🎉 Tạo tài khoản thành công! Chào mừng ${pendingUser.name}`, 'success');
-    setTimeout(() => navigate('dashboard'), 700);
+    try {
+      await api.verifyOtp(pendingUser.email, otpDigits.join(''));
+      const data = await api.register(pendingUser.name, pendingUser.email, pendingUser.password);
+      const user = data.user;
+      dispatch({ type: 'SET_AUTH', payload: { token: data.token, user: { ...user, avatar: avatarFrom(user.name) } } });
+      showToast(`Tạo tài khoản thành công! Chào mừng ${pendingUser.name}`, 'success');
+      setTimeout(() => navigate('dashboard'), 700);
+    } catch (err) {
+      if (err.message.includes('đã tồn tại')) {
+        dispatch({ type: 'SET_EMAIL_MODAL', payload: { open: true, msg: `Email ${pendingUser.email} đã tồn tại. Vui lòng đăng nhập.` } });
+      } else {
+        showToast(err.message || 'OTP không hợp lệ hoặc đã hết hạn', 'error');
+      }
+    }
   };
 
-  const resendOTP = () => {
+  const resendOTP = async () => {
     dispatch({ type: 'SET_OTP_DIGITS', payload: ['','','','','',''] });
     dispatch({ type: 'SET_OTP_TIMER', payload: '04:59' });
-    showToast(`Đã gửi lại mã OTP đến ${state.pendingUser?.email || ''}`, 'success');
+    try {
+      const otpData = await api.sendOtp(state.pendingUser?.email);
+      showToast(`Mã OTP mới: ${otpData.code} (demo)`, 'success', 10000);
+    } catch (err) {
+      showToast(err.message || 'Gửi lại OTP thất bại', 'error');
+    }
   };
 
   const doLogout = () => {
@@ -126,4 +152,23 @@ export function useTutorForm() {
   };
   const submit = () => { if (!tutorForm.name || !tutorForm.email) return showToast('Vui lòng nhập họ tên và email', 'error'); if (!tutorForm.subjects.length) return showToast('Vui lòng chọn ít nhất 1 môn học', 'error'); dispatch({ type: 'ADD_APPLICATION', payload: { ...tutorForm, id: Date.now(), createdAt: new Date().toISOString(), status: 'pending' } }); dispatch({ type: 'RESET_TUTOR_FORM' }); showToast('🎉 Đăng ký thành công! Chúng tôi sẽ liên hệ trong 24h.', 'success'); setTimeout(() => navigate('home'), 1500); };
   return { tutorForm, setField, toggleSubject, submit };
+}
+
+export function useProfile() {
+  const { state, dispatch, showToast } = useApp();
+  const { currentUser } = state;
+
+  const updateName = async (name) => {
+    if (!name.trim()) return showToast('Tên không được để trống', 'error');
+    try {
+      const data = await api.updateMe({ name: name.trim() });
+      const avatar = data.user.name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
+      dispatch({ type: 'SET_CURRENT_USER', payload: { ...currentUser, name: data.user.name, avatar } });
+      showToast('Đã cập nhật tên thành công', 'success');
+    } catch (err) {
+      showToast(err.message || 'Cập nhật thất bại', 'error');
+    }
+  };
+
+  return { updateName };
 }

@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../store/AppContext';
+import { api } from '../../services/api';
 import { Navbar, Footer } from '../common';
 
 export function WalletPage() {
@@ -9,11 +10,17 @@ export function WalletPage() {
   const [showAllTxn, setShowAllTxn] = useState(false);
   const [step, setStep] = useState('form');
   const [amount, setAmount] = useState('');
-  const [bank, setBank] = useState(wallet.banks[0] || '');
+  const [bank, setBank] = useState('');
   const [otp, setOtp] = useState(['','','','','','']);
   const otpRefs = useRef([]);
 
-  const open = (m) => { setMode(m); setStep('form'); setAmount(''); setBank(wallet.banks[0] || ''); setOtp(['','','','','','']); };
+  useEffect(() => {
+    api.getWallet().then((data) => {
+      dispatch({ type: 'SET_WALLET', payload: { balance: data.wallet.balance, banks: data.wallet.banks, transactions: data.wallet.transactions } });
+    }).catch(() => {});
+  }, []);
+
+  const open = (m) => { setMode(m); setStep('form'); setAmount(''); setBank(''); setOtp(['','','','','','']); };
   const close = () => setMode(null);
 
   const handleContinue = () => {
@@ -24,15 +31,18 @@ export function WalletPage() {
     setStep('otp');
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (otp.join('').length < 6) return showToast('Vui lòng nhập đủ 6 chữ số OTP', 'error');
     const amt = Number(amount);
-    if (mode === 'topup') {
-      dispatch({ type: 'SET_WALLET', payload: { balance: wallet.balance + amt, transactions: [{ id: Date.now(), label: `Nạp tiền từ ${bank}`, amount: amt, type: 'in', time: 'Vừa xong' }, ...wallet.transactions] } });
-    } else {
-      dispatch({ type: 'SET_WALLET', payload: { balance: wallet.balance - amt, transactions: [{ id: Date.now(), label: `Rút tiền về ${bank}`, amount: amt, type: 'out', time: 'Vừa xong' }, ...wallet.transactions] } });
+    try {
+      const data = mode === 'topup'
+        ? await api.topup(amt, bank)
+        : await api.withdraw(amt, bank);
+      dispatch({ type: 'SET_WALLET', payload: { balance: data.wallet.balance, banks: data.wallet.banks, transactions: data.wallet.transactions } });
+      setStep('done');
+    } catch (err) {
+      showToast(err.message || 'Có lỗi xảy ra', 'error');
     }
-    setStep('done');
   };
 
   const setDigit = (idx, value) => {
@@ -76,11 +86,16 @@ export function WalletPage() {
               </div>
               <div className="input-group">
                 <label className="input-label">Tài khoản ngân hàng</label>
-                <div className="bank-list">
-                  {wallet.banks.map((b) => (
-                    <div key={b} className={`bank-item ${bank === b ? 'active' : ''}`} onClick={() => setBank(b)}>{b}</div>
-                  ))}
-                </div>
+                <input
+                  className="input-field no-icon"
+                  list="bank-suggestions"
+                  value={bank}
+                  onChange={(e) => setBank(e.target.value)}
+                  placeholder="VD: VCB **** 2891"
+                />
+                <datalist id="bank-suggestions">
+                  {wallet.banks.map((b) => <option key={b} value={b} />)}
+                </datalist>
               </div>
               <div className="row-actions">
                 <button className="btn btn-primary" onClick={handleContinue}>Tiếp tục</button>

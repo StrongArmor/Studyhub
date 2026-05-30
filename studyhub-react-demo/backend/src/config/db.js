@@ -33,10 +33,39 @@ const buildPoolConfig = (url) => {
 const pool = new Pool(buildPoolConfig(databaseUrl));
 
 const runStatements = async (sql) => {
-  const statements = sql
-    .split(';')
-    .map((statement) => statement.trim())
-    .filter(Boolean);
+  const statements = [];
+  let current = '';
+  let dollarTag = null;
+  let i = 0;
+  while (i < sql.length) {
+    if (dollarTag === null) {
+      const tagMatch = sql.slice(i).match(/^(\$[^$]*\$)/);
+      if (tagMatch) {
+        dollarTag = tagMatch[1];
+        current += dollarTag;
+        i += dollarTag.length;
+        continue;
+      }
+      if (sql[i] === ';') {
+        const stmt = current.trim();
+        if (stmt) statements.push(stmt);
+        current = '';
+        i++;
+        continue;
+      }
+    } else {
+      if (sql.slice(i).startsWith(dollarTag)) {
+        current += dollarTag;
+        i += dollarTag.length;
+        dollarTag = null;
+        continue;
+      }
+    }
+    current += sql[i];
+    i++;
+  }
+  const last = current.trim();
+  if (last) statements.push(last);
 
   for (const statement of statements) {
     await pool.query(statement);

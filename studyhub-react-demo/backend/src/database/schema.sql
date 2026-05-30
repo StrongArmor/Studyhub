@@ -1,16 +1,3 @@
-DROP TABLE IF EXISTS otp_sessions CASCADE;
-DROP TABLE IF EXISTS tutor_documents CASCADE;
-DROP TABLE IF EXISTS tutor_certificates CASCADE;
-DROP TABLE IF EXISTS tutor_profile CASCADE;
-DROP TABLE IF EXISTS wallet_transactions CASCADE;
-DROP TABLE IF EXISTS wallet CASCADE;
-DROP TABLE IF EXISTS reports CASCADE;
-DROP TABLE IF EXISTS activities CASCADE;
-DROP TABLE IF EXISTS applications CASCADE;
-DROP TABLE IF EXISTS bookings CASCADE;
-DROP TABLE IF EXISTS tutors CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
-
 CREATE TABLE IF NOT EXISTS users (
   id BIGSERIAL PRIMARY KEY,
   email TEXT NOT NULL UNIQUE,
@@ -47,11 +34,17 @@ CREATE TABLE IF NOT EXISTS tutors (
   decline_count INTEGER NOT NULL DEFAULT 0
 );
 
-ALTER TABLE IF EXISTS tutors
-  ADD CONSTRAINT uq_tutors_user UNIQUE (user_id);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uq_tutors_user') THEN
+    ALTER TABLE tutors ADD CONSTRAINT uq_tutors_user UNIQUE (user_id);
+  END IF;
+END $$;
 
-ALTER TABLE IF EXISTS tutors
-  ADD CONSTRAINT fk_tutors_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_tutors_user') THEN
+    ALTER TABLE tutors ADD CONSTRAINT fk_tutors_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS bookings (
   id BIGSERIAL PRIMARY KEY,
@@ -70,9 +63,14 @@ CREATE TABLE IF NOT EXISTS bookings (
   created_at TEXT NOT NULL
 );
 
-ALTER TABLE IF EXISTS bookings
-  ADD CONSTRAINT fk_bookings_tutor FOREIGN KEY (tutor_id) REFERENCES users(id) ON DELETE SET NULL,
-  ADD CONSTRAINT fk_bookings_student FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE SET NULL;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_bookings_tutor') THEN
+    ALTER TABLE bookings ADD CONSTRAINT fk_bookings_tutor FOREIGN KEY (tutor_id) REFERENCES users(id) ON DELETE SET NULL;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_bookings_student') THEN
+    ALTER TABLE bookings ADD CONSTRAINT fk_bookings_student FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE SET NULL;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS applications (
   id BIGSERIAL PRIMARY KEY,
@@ -89,8 +87,11 @@ CREATE TABLE IF NOT EXISTS applications (
   created_at TEXT NOT NULL
 );
 
-ALTER TABLE IF EXISTS applications
-  ADD CONSTRAINT fk_applications_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_applications_user') THEN
+    ALTER TABLE applications ADD CONSTRAINT fk_applications_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS activities (
   id BIGSERIAL PRIMARY KEY,
@@ -113,20 +114,25 @@ CREATE TABLE IF NOT EXISTS reports (
   created_at TEXT NOT NULL
 );
 
-ALTER TABLE IF EXISTS reports
-  ADD CONSTRAINT fk_reports_tutor FOREIGN KEY (tutor_id) REFERENCES users(id) ON DELETE SET NULL,
-  ADD CONSTRAINT fk_reports_student FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE SET NULL;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_reports_tutor') THEN
+    ALTER TABLE reports ADD CONSTRAINT fk_reports_tutor FOREIGN KEY (tutor_id) REFERENCES users(id) ON DELETE SET NULL;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_reports_student') THEN
+    ALTER TABLE reports ADD CONSTRAINT fk_reports_student FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE SET NULL;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS wallet (
-  id INTEGER PRIMARY KEY CHECK (id = 1),
-  balance INTEGER NOT NULL,
-  topup TEXT NOT NULL,
-  selected_bank TEXT NOT NULL,
-  banks_json TEXT NOT NULL
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL UNIQUE,
+  balance INTEGER NOT NULL DEFAULT 0,
+  banks_json TEXT NOT NULL DEFAULT '[]'
 );
 
 CREATE TABLE IF NOT EXISTS wallet_transactions (
   id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT,
   label TEXT NOT NULL,
   amount INTEGER NOT NULL,
   type TEXT NOT NULL CHECK (type IN ('in', 'out')),
@@ -142,8 +148,11 @@ CREATE TABLE IF NOT EXISTS tutor_certificates (
   issued_at TEXT NOT NULL
 );
 
-ALTER TABLE IF EXISTS tutor_certificates
-  ADD CONSTRAINT fk_tutor_cert_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_tutor_cert_user') THEN
+    ALTER TABLE tutor_certificates ADD CONSTRAINT fk_tutor_cert_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS tutor_documents (
   id BIGSERIAL PRIMARY KEY,
@@ -153,8 +162,11 @@ CREATE TABLE IF NOT EXISTS tutor_documents (
   uploaded_at TEXT NOT NULL
 );
 
-ALTER TABLE IF EXISTS tutor_documents
-  ADD CONSTRAINT fk_tutor_doc_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_tutor_doc_user') THEN
+    ALTER TABLE tutor_documents ADD CONSTRAINT fk_tutor_doc_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS tutor_reviews (
   id BIGSERIAL PRIMARY KEY,
@@ -166,14 +178,19 @@ CREATE TABLE IF NOT EXISTS tutor_reviews (
   created_at TEXT NOT NULL
 );
 
-ALTER TABLE IF EXISTS tutor_reviews
-  ADD CONSTRAINT fk_tutor_reviews_tutor FOREIGN KEY (tutor_user_id) REFERENCES users(id) ON DELETE CASCADE,
-  ADD CONSTRAINT fk_tutor_reviews_student FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE SET NULL;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_tutor_reviews_tutor') THEN
+    ALTER TABLE tutor_reviews ADD CONSTRAINT fk_tutor_reviews_tutor FOREIGN KEY (tutor_user_id) REFERENCES users(id) ON DELETE CASCADE;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_tutor_reviews_student') THEN
+    ALTER TABLE tutor_reviews ADD CONSTRAINT fk_tutor_reviews_student FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE SET NULL;
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS otp_sessions (
   id BIGSERIAL PRIMARY KEY,
   email TEXT NOT NULL UNIQUE,
   code TEXT NOT NULL,
-  expires_at INTEGER NOT NULL,
+  expires_at BIGINT NOT NULL,
   created_at TEXT NOT NULL
 );

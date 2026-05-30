@@ -163,9 +163,9 @@ export function AppProvider({ children }) {
     dispatch({ type: 'SET_PAGE', payload: page });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
-  const showToast = useCallback((msg, type = 'success') => {
+  const showToast = useCallback((msg, type = 'success', duration = 2800) => {
     dispatch({ type: 'SET_TOAST', payload: { msg, type } });
-    setTimeout(() => dispatch({ type: 'SET_TOAST', payload: { msg: '', type: '' } }), 2800);
+    setTimeout(() => dispatch({ type: 'SET_TOAST', payload: { msg: '', type: '' } }), duration);
   }, []);
 
   return <AppContext.Provider value={{ state, dispatch, navigate, showToast }}>{children}</AppContext.Provider>;

@@ -104,8 +104,6 @@ export const mapReport = (row) => ({
 
 export const mapWallet = (row) => ({
   balance: row.balance,
-  topup: row.topup,
-  selectedBank: row.selected_bank,
   banks: parseJson(row.banks_json, [])
 });
 

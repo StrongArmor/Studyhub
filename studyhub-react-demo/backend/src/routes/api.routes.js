@@ -255,7 +255,19 @@ router.post('/login', wrap(async (req, res) => {
   }
 
   const token = generateToken({ id: user.id, email: user.email, role: user.role });
-  sendSuccess(res, { access_token: token }, 'Đăng nhập thành công');
+  sendSuccess(res, { access_token: token, user: mapUser(user) }, 'Đăng nhập thành công');
+}));
+
+router.patch('/users/me', authenticate, wrap(async (req, res) => {
+  const { name, avatar } = req.body ?? {};
+  const sets = [];
+  const params = [];
+  if (name !== undefined) sets.push(`name = $${params.push(String(name).trim())}`);
+  if (avatar !== undefined) sets.push(`avatar = $${params.push(String(avatar).trim())}`);
+  if (!sets.length) throw httpError(400, 'Không có dữ liệu cần cập nhật');
+  params.push(req.user.id);
+  const updated = await row(`UPDATE users SET ${sets.join(', ')} WHERE id = $${params.length} RETURNING *`, params);
+  sendSuccess(res, { user: mapUser(updated) }, 'Cập nhật thành công');
 }));
 
 router.post('/register', wrap(async (req, res) => {
@@ -275,6 +287,7 @@ router.post('/register', wrap(async (req, res) => {
   // hash password before storing
   const hashed = await bcrypt.hash(password, 10);
   const created = await row('INSERT INTO users (email, password, role, name, status) VALUES ($1, $2, $3, $4, $5) RETURNING *', [email, hashed, role, name, 'active']);
+  await query('INSERT INTO wallet (user_id, balance, banks_json) VALUES ($1, 200000, $2) ON CONFLICT (user_id) DO NOTHING', [created.id, '[]']);
   await addActivity('user', 'Tài khoản mới được tạo', email);
   const token = generateToken({ id: created.id, email: created.email, role: created.role });
   sendSuccess(res, { token, user: { id: created.id, name: created.name, email: created.email, role: created.role } }, 'Đăng ký thành công', 201);

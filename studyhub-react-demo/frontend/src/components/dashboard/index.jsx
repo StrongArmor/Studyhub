@@ -1,19 +1,27 @@
 import { useState } from 'react';
 import { useApp } from '../../store/AppContext';
 import { Navbar, Footer } from '../common';
-import { useBooking } from '../../hooks';
+import { useBooking, useProfile } from '../../hooks';
 
 function BookingCard({ tutorName, subject, date, time, duration, price, status, initials, color, action }) { return <div className="booking-card"><div className="booking-top"><div className="booking-tutor"><div className="booking-avatar" style={{ background: color }}>{initials}</div><div><div className="booking-info"><h3>{tutorName}</h3></div><div className="booking-subject">{subject}</div><div className="booking-meta"><span className="booking-meta-item">📅 {date}</span><span className="booking-meta-item">🕐 {time} ({duration} phút)</span><span className="booking-price">{price.toLocaleString()}đ</span></div></div></div><span className={`status-badge ${status === 'Đã xác nhận' ? 'status-confirmed' : 'status-completed'}`}>{status}</span></div><div className="booking-actions">{action}</div></div>; }
 
 export function StudentDashboard() {
   const { state, navigate } = useApp();
   const { cancelBooking, openReviewModal, openReportModal, openBookingModal } = useBooking();
+  const { updateName } = useProfile();
   const { wallet, bookings, tutors, applications, currentUser } = state;
   const myApplications = applications.filter((a) => a.email === currentUser?.email);
   const [activeTab, setActiveTab] = useState('upcoming');
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState(currentUser?.name || '');
   const upcoming = bookings.filter((b) => b.status === 'confirmed');
   const completed = bookings.filter((b) => b.status === 'completed');
   const { dispatch } = useApp();
+
+  const handleSaveName = async () => {
+    await updateName(nameInput);
+    setEditingName(false);
+  };
   const joinClass = (b) => {
     dispatch({ type: 'SET_BOOKING_STAGE', payload: 'detail' });
     dispatch({ type: 'SET_SESSION', payload: { tutor: b.tutorName, student: currentUser?.name || 'Học viên', subject: b.subject, room: b.meetLink || 'https://meet.google.com/vvk-fuco-zpo', time: `${b.date} · ${b.time} (${b.duration} phút)` } });
@@ -59,5 +67,28 @@ export function StudentDashboard() {
             </div>
           </div>
         )}
+        <div style={{ marginTop: 32 }}>
+          <div className="tabs"><div className="tab-item active">Thông tin cá nhân</div></div>
+          <div className="booking-card" style={{ marginTop: 12 }}>
+            <div className="booking-top">
+              <div className="booking-tutor">
+                <div className="booking-avatar" style={{ background: '#3B5BDB' }}>{currentUser?.avatar || '?'}</div>
+                <div>
+                  {editingName ? (
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <input className="input-field no-icon" style={{ margin: 0, width: 200 }} value={nameInput} onChange={(e) => setNameInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSaveName()} />
+                      <button className="btn btn-primary btn-sm" onClick={handleSaveName}>Lưu</button>
+                      <button className="btn btn-outline btn-sm" onClick={() => { setEditingName(false); setNameInput(currentUser?.name || ''); }}>Huỷ</button>
+                    </div>
+                  ) : (
+                    <div className="booking-info"><h3>{currentUser?.name}</h3></div>
+                  )}
+                  <div className="booking-subject">{currentUser?.email}</div>
+                </div>
+              </div>
+              {!editingName && <button className="btn btn-outline btn-sm" onClick={() => { setEditingName(true); setNameInput(currentUser?.name || ''); }}>Chỉnh sửa tên</button>}
+            </div>
+          </div>
+        </div>
       </div><Footer /></>;
 }

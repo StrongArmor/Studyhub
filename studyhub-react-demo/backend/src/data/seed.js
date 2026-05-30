@@ -37,17 +37,6 @@ const seedReports = [
   { bookingId: 3, tutorEmail: 'tutor4@studyhub.vn', studentEmail: 'user@studyhub.vn', issue: 'Nội dung buổi học không đúng cam kết', detail: 'Buổi học chưa đi đúng lộ trình mong đợi.', status: 'pending', createdAt: '2026-05-12T08:00:00.000Z' }
 ];
 
-const seedWallet = {
-  balance: 7250000,
-  topup: '500000',
-  selectedBank: 'VCB **** 2891',
-  banks: ['VCB **** 2891', 'MB **** 1122', 'ACB **** 5544'],
-  transactions: [
-    { label: 'Nạp tiền từ thẻ', amount: 500000, type: 'in', time: 'Hôm nay 09:10', createdAt: '2026-05-24T09:10:00.000Z' },
-    { label: 'Thanh toán buổi học', amount: 150000, type: 'out', time: 'Hôm qua 20:15', createdAt: '2026-05-23T20:15:00.000Z' },
-    { label: 'Rút tiền về ngân hàng', amount: 1000000, type: 'out', time: '2 ngày trước', createdAt: '2026-05-22T10:00:00.000Z' }
-  ]
-};
 
 const hashPassword = (password) => bcrypt.hash(password, 10);
 
@@ -124,16 +113,6 @@ export const seedDatabase = async (db) => {
       const studentName = studentRes.rows[0] ? studentRes.rows[0].name : null;
 
       await db.query('INSERT INTO reports (booking_id, tutor_id, student_id, tutor_name, student_name, issue, detail, status, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [report.bookingId, tutorId, studentId, tutorName, studentName, report.issue, report.detail, report.status, report.createdAt]);
-    }
-  });
-
-  await runIfEmpty('wallet', async () => {
-    await db.query('INSERT INTO wallet (id, balance, topup, selected_bank, banks_json) VALUES (1, $1, $2, $3, $4)', [seedWallet.balance, seedWallet.topup, seedWallet.selectedBank, JSON.stringify(seedWallet.banks)]);
-  });
-
-  await runIfEmpty('wallet_transactions', async () => {
-    for (const transaction of seedWallet.transactions) {
-      await db.query('INSERT INTO wallet_transactions (label, amount, type, time, created_at) VALUES ($1, $2, $3, $4, $5)', [transaction.label, transaction.amount, transaction.type, transaction.time, transaction.createdAt]);
     }
   });
 
