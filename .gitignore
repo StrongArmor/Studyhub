@@ -4,3 +4,6 @@
 
 /.github
 /.vs
+*.env
+node_modules
+dist

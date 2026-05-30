@@ -16,7 +16,7 @@ function Router() {
   switch (state.page) {
     case 'home': return state.currentUser?.role === 'admin' ? <AdminPanel /> : <HomePage />;
     case 'role-select': return <RoleSelectPage />;
-    case 'login-student': return <LoginPage role="student" />;
+    case 'login-user': return <LoginPage role="user" />;
     case 'login-tutor': return <LoginPage role="tutor" />;
     case 'login-admin': return <LoginPage role="admin" />;
     case 'register': return <RegisterPage />;

@@ -16,15 +16,15 @@ const initialState = {
   currentUser: auth.user,
   authToken: auth.token,
   authUsers: [
-    { email: 'student@studyhub.vn', password: '12345678', role: 'student', name: 'Học viên Demo' },
+    { email: 'user@studyhub.vn', password: '12345678', role: 'user', name: 'Học viên Demo' },
     { email: 'tutor@studyhub.vn', password: '12345678', role: 'tutor', name: 'Gia sư Demo' },
     { email: 'admin@studyhub.vn', password: '12345678', role: 'admin', name: 'Admin Demo' }
   ],
-  selectedRole: 'student',
+  selectedRole: 'user',
   pendingUser: null,
   register: { name: '', email: '', pass: '', confirm: '', agree: false },
   login: {
-    studentEmail: 'student@studyhub.vn', studentPass: '12345678',
+    studentEmail: 'user@studyhub.vn', studentPass: '12345678',
     tutorEmail: 'tutor@studyhub.vn', tutorPass: '12345678',
     adminEmail: 'admin@studyhub.vn', adminPass: '12345678'
   },
@@ -146,6 +146,7 @@ function reducer(state, action) {
     case 'REMOVE_SCHEDULE_SLOT': return { ...state, tutorProfile: { ...state.tutorProfile, scheduleSlots: state.tutorProfile.scheduleSlots.filter(s => s.id !== action.payload) } };
     case 'SET_SELECTED_SLOTS': return { ...state, tutorProfile: { ...state.tutorProfile, selectedSlots: action.payload } };
     case 'SET_DECLINE_COUNT': return { ...state, tutorProfile: { ...state.tutorProfile, declineCount: action.payload } };
+      case 'UPDATE_TUTOR': return { ...state, tutors: state.tutors.map((t) => t.id === action.payload.id ? action.payload : t) };
     default: return state;
   }
 }
