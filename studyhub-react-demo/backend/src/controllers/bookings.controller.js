@@ -2,13 +2,19 @@ import { db } from '../config/db.js';
 import { mapBooking, mapTutor } from '../utils/serializers.js';
 import { insertActivity as addActivity } from '../services/activity.service.js';
 import { sendError, sendSuccess } from '../utils/responses.js';
+import { createGoogleMeetEvent, isGoogleMeetConfigured } from '../services/googleMeet.service.js';
 
 const query = (text, params = []) => db.query(text, params);
+
+const generateFallbackMeetLink = () => {
+  const seg = () => Math.random().toString(36).slice(2, 5);
+  return `https://meet.google.com/${seg()}-${seg()}${seg().slice(0,1)}-${seg()}`;
+};
 
 export const createBooking = async (req, res) => {
   const body = req.body || {};
   const tutorId = Number(body.tutorId || body.tutor || null);
-  const studentId = Number(body.studentId || body.student || null);
+  const studentId = Number(body.studentId || body.student || req.user?.id || null);
   const tutorName = String(body.tutorName || '').trim();
   const subject = String(body.subject ?? '').trim();
   const date = String(body.date ?? '').trim();
@@ -20,7 +26,19 @@ export const createBooking = async (req, res) => {
     sendError(res, 400, 'Thiếu thông tin đặt lịch');
     return;
   }
-  // resolve tutor info if id provided
+
+  const userId = req.user?.id;
+  if (userId && price > 0) {
+    await query('INSERT INTO wallet (user_id, balance, banks_json) VALUES ($1, 0, $2) ON CONFLICT (user_id) DO NOTHING', [userId, '[]']);
+    const walletRow = (await query('SELECT * FROM wallet WHERE user_id = $1', [userId])).rows[0];
+    if (!walletRow || walletRow.balance < price) {
+      sendError(res, 400, 'Số dư ví không đủ để đặt lịch học. Vui lòng nạp thêm tiền.');
+      return;
+    }
+    await query('UPDATE wallet SET balance = balance - $1 WHERE user_id = $2', [price, userId]);
+    await query('INSERT INTO wallet_transactions (user_id, label, amount, type, time, created_at) VALUES ($1, $2, $3, $4, $5, $6)', [userId, `Thanh toán buổi học - ${subject}`, price, 'out', 'Vừa xong', new Date().toISOString()]);
+  }
+
   let resolvedTutorName = tutorName;
   let resolvedTutorInitials = body.tutorInitials || null;
   let resolvedTutorColor = body.tutorColor || null;
@@ -31,7 +49,26 @@ export const createBooking = async (req, res) => {
   if (!resolvedTutorInitials) resolvedTutorInitials = resolvedTutorName ? resolvedTutorName.split(' ').map((p) => p[0]).join('').slice(0, 3).toUpperCase() : 'TUT';
   if (!resolvedTutorColor) resolvedTutorColor = '#3B5BDB';
 
-  const created = (await query('INSERT INTO bookings (tutor_id, student_id, tutor_name, tutor_initials, tutor_color, subject, date, time, duration, price, status, review_json, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *', [Number.isFinite(tutorId) ? tutorId : null, Number.isFinite(studentId) ? studentId : null, resolvedTutorName, resolvedTutorInitials, resolvedTutorColor, subject, date, time, duration, price, 'confirmed', null, new Date().toISOString()])).rows[0];
+  let meetLink = generateFallbackMeetLink();
+  if (isGoogleMeetConfigured()) {
+    try {
+      const startDT = `${date}T${time}:00`;
+      const endDate = new Date(startDT);
+      endDate.setMinutes(endDate.getMinutes() + duration);
+      const endDT = endDate.toISOString().replace('Z', '');
+      const meetResult = await createGoogleMeetEvent({
+        summary: `StudyHub: ${subject} - ${resolvedTutorName}`,
+        description: `Buổi học ${subject} giữa gia sư ${resolvedTutorName} và học viên.`,
+        startDateTime: startDT,
+        endDateTime: endDT,
+      });
+      if (meetResult?.meetLink) meetLink = meetResult.meetLink;
+    } catch (_err) {
+      // fallback link already set
+    }
+  }
+
+  const created = (await query('INSERT INTO bookings (tutor_id, student_id, tutor_name, tutor_initials, tutor_color, subject, date, time, duration, price, status, review_json, meet_link, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *', [Number.isFinite(tutorId) ? tutorId : null, Number.isFinite(studentId) ? studentId : null, resolvedTutorName, resolvedTutorInitials, resolvedTutorColor, subject, date, time, duration, price, 'confirmed', null, meetLink, new Date().toISOString()])).rows[0];
 
   const booking = mapBooking(created);
   await addActivity('booking', 'Lịch học mới được tạo', `${booking.tutorName} - ${booking.subject}`);

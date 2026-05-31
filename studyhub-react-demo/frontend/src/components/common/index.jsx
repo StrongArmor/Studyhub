@@ -39,7 +39,62 @@ export function InputField({ label, icon, value, onChange, placeholder, type = '
   return <div className="input-group">{label && <label className="input-label">{label}</label>}<div className="input-wrap">{!noIcon && <span className="input-icon">{icon}</span>}<input className={`input-field${noIcon ? ' no-icon' : ''}${isPassword ? ' has-eye' : ''}`} type={inputType} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />{isPassword && <button type="button" className="eye-toggle" onClick={() => setShow((v) => !v)}>{show ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg> : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>}</button>}</div>{hint && <div className="input-hint">{hint}</div>}</div>;
 }
 
-export function BookingModal() { const { state, dispatch } = useApp(); const { submitBooking } = useBooking(); const { bookingModal } = state; if (!bookingModal.open) return null; return <div className="modal-overlay"><div className="error-modal"><div className="error-modal-title">Đặt lịch học</div><div className="input-group"><label className="input-label">Gia sư</label><div className="muted">{bookingModal.tutor?.name || ''}</div></div><div className="input-group"><label className="input-label">Ngày học</label><input className="input-field no-icon" value={bookingModal.date} onChange={(e) => dispatch({ type: 'SET_BOOKING_MODAL', payload: { date: e.target.value } })} /></div><div className="input-group"><label className="input-label">Giờ học</label><input className="input-field no-icon" value={bookingModal.time} onChange={(e) => dispatch({ type: 'SET_BOOKING_MODAL', payload: { time: e.target.value } })} /></div><div className="input-group"><label className="input-label">Ghi chú</label><textarea className="textarea-field" rows="3" value={bookingModal.note} onChange={(e) => dispatch({ type: 'SET_BOOKING_MODAL', payload: { note: e.target.value } })} /></div><div className="error-modal-actions"><button className="btn btn-primary" style={{ flex: 1 }} onClick={submitBooking}>Xác nhận</button><button className="btn btn-outline" style={{ flex: 1 }} onClick={() => dispatch({ type: 'SET_BOOKING_MODAL', payload: { open: false, tutor: null } })}>Đóng</button></div></div></div>;
+export function BookingModal() {
+  const { state, dispatch } = useApp();
+  const { submitBooking } = useBooking();
+  const { bookingModal } = state;
+  if (!bookingModal.open) return null;
+
+  const updateSlot = (index, field, value) => {
+    const newSlots = [...(bookingModal.slots || [])];
+    newSlots[index] = { ...newSlots[index], [field]: value };
+    dispatch({ type: 'SET_BOOKING_MODAL', payload: { slots: newSlots } });
+  };
+
+  const addSlot = () => {
+    dispatch({ type: 'SET_BOOKING_MODAL', payload: { slots: [...(bookingModal.slots || []), { date: '', time: '' }] } });
+  };
+
+  const removeSlot = (index) => {
+    const newSlots = [...(bookingModal.slots || [])];
+    newSlots.splice(index, 1);
+    dispatch({ type: 'SET_BOOKING_MODAL', payload: { slots: newSlots } });
+  };
+
+  return (
+    <div className="modal-overlay">
+      <div className="error-modal" style={{ maxHeight: '90vh', overflowY: 'auto' }}>
+        <div className="error-modal-title">Đặt lịch học</div>
+        <div className="input-group">
+          <label className="input-label">Gia sư</label>
+          <div className="muted">{bookingModal.tutor?.name || ''}</div>
+        </div>
+        
+        <div className="input-group">
+          <label className="input-label">Các buổi học</label>
+          {bookingModal.slots?.map((slot, idx) => (
+            <div key={idx} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+              <input type="date" className="input-field no-icon" value={slot.date} onChange={(e) => updateSlot(idx, 'date', e.target.value)} />
+              <input type="time" className="input-field no-icon" value={slot.time} onChange={(e) => updateSlot(idx, 'time', e.target.value)} />
+              {bookingModal.slots.length > 1 && (
+                <button className="btn btn-outline btn-sm" onClick={() => removeSlot(idx)} style={{ padding: '0 8px', color: '#c92a2a', borderColor: '#c92a2a' }}>✕</button>
+              )}
+            </div>
+          ))}
+          <button className="btn btn-outline btn-sm" onClick={addSlot} style={{ alignSelf: 'flex-start', marginTop: 4 }}>+ Thêm buổi học</button>
+        </div>
+
+        <div className="input-group">
+          <label className="input-label">Ghi chú</label>
+          <textarea className="textarea-field" rows="3" value={bookingModal.note} onChange={(e) => dispatch({ type: 'SET_BOOKING_MODAL', payload: { note: e.target.value } })} />
+        </div>
+        <div className="error-modal-actions">
+          <button className="btn btn-primary" style={{ flex: 1 }} onClick={submitBooking}>Xác nhận</button>
+          <button className="btn btn-outline" style={{ flex: 1 }} onClick={() => dispatch({ type: 'SET_BOOKING_MODAL', payload: { open: false, tutor: null } })}>Đóng</button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export function ReviewModal() { const { state, dispatch } = useApp(); const { submitReview } = useBooking(); const { reviewModal } = state; if (!reviewModal.open) return null; return <div className="modal-overlay"><div className="error-modal"><div className="error-modal-title">Đánh giá buổi học</div><div className="input-group"><label className="input-label">Gia sư</label><div className="muted">{reviewModal.tutorName}</div></div><div className="input-group"><label className="input-label">Điểm đánh giá</label><select className="filter-select" value={reviewModal.rating} onChange={(e) => dispatch({ type: 'SET_REVIEW_MODAL', payload: { rating: e.target.value } })}><option value="5">5 sao</option><option value="4">4 sao</option><option value="3">4 sao</option><option value="2">2 sao</option><option value="1">1 sao</option></select></div><div className="input-group"><label className="input-label">Nhận xét</label><textarea className="textarea-field" rows="4" value={reviewModal.comment} onChange={(e) => dispatch({ type: 'SET_REVIEW_MODAL', payload: { comment: e.target.value } })} /></div><div className="error-modal-actions"><button className="btn btn-primary" style={{ flex: 1 }} onClick={submitReview}>Gửi đánh giá</button><button className="btn btn-outline" style={{ flex: 1 }} onClick={() => dispatch({ type: 'SET_REVIEW_MODAL', payload: { open: false, tutorName: '', rating: '5', comment: '' } })}>Đóng</button></div></div></div>;

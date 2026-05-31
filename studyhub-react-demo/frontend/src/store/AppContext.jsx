@@ -46,7 +46,7 @@ const initialState = {
     { id: 2, tutorName: 'Trần Hải Đăng', tutorInitials: 'THĐ', tutorColor: '#7C3AED', subject: 'IELTS Speaking', date: '2026-05-10', time: '20:00', duration: 30, price: 200000, status: 'confirmed', meetLink: 'https://meet.google.com/klm-nopq-rst' },
     { id: 3, tutorName: 'Phạm Quốc Khánh', tutorInitials: 'PQK', tutorColor: '#0C8599', subject: 'Python cơ bản', date: '2026-04-28', time: '20:30', duration: 45, price: 250000, status: 'completed', meetLink: 'https://meet.google.com/uvw-xyz1-234' }
   ],
-  bookingModal: { open: false, tutor: null, date: '2026-05-20', time: '19:00', note: '' },
+  bookingModal: { open: false, tutor: null, slots: [{ date: '2026-05-20', time: '19:00' }], note: '' },
   reviewModal: { open: false, tutorName: '', rating: '5', comment: '' },
   reportModal: { open: false, bookingId: null, tutorName: '', issue: 'quality', detail: '' },
   tutorModal: { open: false, tutor: null },

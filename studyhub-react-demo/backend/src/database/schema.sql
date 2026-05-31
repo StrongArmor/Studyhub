@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   price INTEGER NOT NULL,
   status TEXT NOT NULL,
   review_json TEXT,
+  meet_link TEXT,
   created_at TEXT NOT NULL
 );
 

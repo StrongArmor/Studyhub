@@ -63,6 +63,7 @@ export const mapBooking = (row) => ({
   price: row.price,
   status: row.status,
   review: parseJson(row.review_json, null),
+  meetLink: row.meet_link,
   createdAt: row.created_at
 });
 

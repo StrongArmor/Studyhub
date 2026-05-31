@@ -31,4 +31,5 @@ export const api = {
   withdraw:           (amount, bank)           => req('POST', '/wallet/withdraw',    { amount, bank }),
   updateMe:           (data)                   => req('PATCH', '/users/me',          data),
   updateTutorProfile: (data)                   => req('PATCH', '/tutor/profile',     data),
+  createBooking:      (data)                   => req('POST', '/bookings',           data),
 };

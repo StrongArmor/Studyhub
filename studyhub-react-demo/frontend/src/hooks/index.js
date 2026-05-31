@@ -108,15 +108,49 @@ export function useTutors() {
 
 export function useBooking() {
   const { state, dispatch, navigate, showToast } = useApp();
-  const openBookingModal = (tutor) => dispatch({ type: 'SET_BOOKING_MODAL', payload: { open: true, tutor, date: '2026-05-20', time: '19:00', note: '' } });
-  const submitBooking = () => {
+  const openBookingModal = (tutor) => dispatch({ type: 'SET_BOOKING_MODAL', payload: { open: true, tutor, slots: [{ date: '2026-05-20', time: '19:00' }], note: '' } });
+  const submitBooking = async () => {
     const { bookingModal } = state;
-    if (!bookingModal.date || !bookingModal.time) return showToast('Vui lòng chọn ngày và giờ học', 'error');
-    const meetId = Math.random().toString(36).slice(2, 5) + '-' + Math.random().toString(36).slice(2, 6) + '-' + Math.random().toString(36).slice(2, 5);
-    dispatch({ type: 'ADD_BOOKING', payload: { id: Date.now(), tutorName: bookingModal.tutor?.name || '', tutorInitials: bookingModal.tutor?.initials || '', tutorColor: bookingModal.tutor?.color || '#3B5BDB', subject: bookingModal.tutor?.subjects?.[0] || '', date: bookingModal.date, time: bookingModal.time, duration: 45, price: bookingModal.tutor?.price || 0, status: 'confirmed', meetLink: `https://meet.google.com/${meetId}` } });
-    dispatch({ type: 'SET_BOOKING_MODAL', payload: { open: false, tutor: null } });
-    showToast(`Đã đặt lịch với ${bookingModal.tutor?.name} thành công!`, 'success');
-    navigate('dashboard');
+    if (!bookingModal.slots || bookingModal.slots.length === 0) return showToast('Vui lòng thêm ít nhất 1 giờ học', 'error');
+    
+    // Check if all slots have date and time
+    for (const slot of bookingModal.slots) {
+      if (!slot.date || !slot.time) return showToast('Vui lòng điền đủ ngày giờ cho tất cả các buổi học', 'error');
+    }
+
+    try {
+      let successCount = 0;
+      for (const slot of bookingModal.slots) {
+        const data = await api.createBooking({
+          tutorId: bookingModal.tutor?.id,
+          tutorName: bookingModal.tutor?.name,
+          tutorInitials: bookingModal.tutor?.initials,
+          tutorColor: bookingModal.tutor?.color,
+          subject: bookingModal.tutor?.subjects?.[0] || '',
+          date: slot.date,
+          time: slot.time,
+          duration: 45,
+          price: bookingModal.tutor?.price || 0
+        });
+
+        dispatch({ type: 'ADD_BOOKING', payload: data.booking });
+        successCount++;
+      }
+      
+      // Update wallet if logged in
+      if (state.currentUser) {
+        try {
+          const walletData = await api.getWallet();
+          dispatch({ type: 'SET_WALLET', payload: walletData.wallet });
+        } catch (_e) {}
+      }
+
+      dispatch({ type: 'SET_BOOKING_MODAL', payload: { open: false, tutor: null } });
+      showToast(`Đã đặt thành công ${successCount} buổi học với ${bookingModal.tutor?.name}!`, 'success');
+      navigate('dashboard');
+    } catch (err) {
+      showToast(err.message || 'Có lỗi xảy ra khi đặt lịch', 'error');
+    }
   };
   const cancelBooking = (id) => { dispatch({ type: 'CANCEL_BOOKING', payload: id }); showToast('Đã hủy buổi học thành công', 'success'); };
   const openReviewModal = (tutorName) => dispatch({ type: 'SET_REVIEW_MODAL', payload: { open: true, tutorName, rating: '5', comment: '' } });
