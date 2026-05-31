@@ -1,4 +1,6 @@
-﻿import { useApp } from '../../store/AppContext';
+import { useEffect } from 'react';
+import { useApp } from '../../store/AppContext';
+import { api } from '../../services/api';
 import { Navbar, Footer } from '../common';
 
 function AdminOverview({ stats, revenueSeries, bookingStatus }) { return <div className="admin-stack"><div className="metrics-grid">{[['Tổng người dùng', stats.totalUsers], ['Gia sư hoạt động', stats.activeTutors], ['Đăng ký chờ duyệt', stats.pendingApplications], ['Doanh thu hôm nay', `${Number(stats.todayRevenue).toLocaleString()}đ`], ['Tổng bookings', stats.totalBookings], ['Gia sư online', stats.onlineTutors], ['Tỷ lệ duyệt', `${stats.approvalRate}%`], ['Rating TB', stats.avgRating]].map(([label, value]) => <div key={label} className="metric-card"><div className="muted">{label}</div><strong>{value}</strong></div>)}</div><div className="admin-grid-2"><div className="admin-card"><div className="section-title-small">Biểu đồ doanh thu 7 ngày</div><div className="bar-chart">{revenueSeries.map((item) => <div key={item.label} className="bar-item"><div className="bar-value" style={{ height: `${Math.max(item.value * 4, 10)}px` }}></div><span>{item.label}</span><small>{item.value}M</small></div>)}</div></div><div className="admin-card"><div className="section-title-small">Trạng thái bookings</div>{bookingStatus.map((item) => <div key={item.label} className="status-row"><span>{item.label}</span><strong>{item.value}%</strong></div>)}</div></div></div>; }
@@ -97,10 +99,34 @@ export function AdminPanel() {
   const tutors = state.tutors;
   const users = state.authUsers.filter((u) => u.role === 'student').map((u) => ({ ...u, status: 'active' }));
 
-  const onAccept = (id) => { dispatch({ type: 'UPDATE_APPLICATION_STATUS', payload: { id, status: 'approved' } }); showToast('Đã duyệt đơn đăng ký', 'success'); };
-  const onDeny = (id) => { dispatch({ type: 'UPDATE_APPLICATION_STATUS', payload: { id, status: 'rejected' } }); showToast('Đã từ chối đơn đăng ký', 'success'); };
+  const onAccept = async (id) => { 
+    try {
+      await api.patchApplication(id, 'approved');
+      dispatch({ type: 'UPDATE_APPLICATION_STATUS', payload: { id, status: 'approved' } }); 
+      showToast('Đã duyệt đơn đăng ký', 'success'); 
+    } catch(err) {
+      showToast(err.message || 'Lỗi duyệt đơn', 'error');
+    }
+  };
+  const onDeny = async (id) => { 
+    try {
+      await api.patchApplication(id, 'rejected');
+      dispatch({ type: 'UPDATE_APPLICATION_STATUS', payload: { id, status: 'rejected' } }); 
+      showToast('Đã từ chối đơn đăng ký', 'success'); 
+    } catch(err) {
+      showToast(err.message || 'Lỗi từ chối đơn', 'error');
+    }
+  };
   const onResolve = (id) => { dispatch({ type: 'UPDATE_REPORT_STATUS', payload: { id, status: 'resolved' } }); showToast('Đã đánh dấu đã xử lý', 'success'); };
   const onDismiss = (id) => { dispatch({ type: 'UPDATE_REPORT_STATUS', payload: { id, status: 'dismissed' } }); showToast('Đã bỏ qua khiếu nại', 'success'); };
+
+  useEffect(() => {
+    if (admin.tab === 'applications' && state.currentUser?.role === 'admin') {
+      api.getApplications()
+        .then(data => dispatch({ type: 'SET_APPLICATIONS', payload: data.applications }))
+        .catch(err => console.error(err));
+    }
+  }, [admin.tab, state.currentUser, dispatch]);
 
   const pendingCount = applications.filter((a) => a.status === 'pending').length;
   const approvedCount = applications.filter((a) => a.status === 'approved').length;

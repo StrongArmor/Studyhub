@@ -114,6 +114,7 @@ function reducer(state, action) {
     case 'SET_WITHDRAW': return { ...state, withdraw: { ...state.withdraw, ...action.payload } };
     case 'SET_TUTOR_FORM': return { ...state, tutorForm: { ...state.tutorForm, ...action.payload } };
     case 'RESET_TUTOR_FORM': return { ...state, tutorForm: initialState.tutorForm };
+    case 'SET_APPLICATIONS': return { ...state, applications: action.payload };
     case 'ADD_APPLICATION': return { ...state, applications: [action.payload, ...state.applications] };
     case 'UPDATE_APPLICATION_STATUS': return { ...state, applications: state.applications.map((a) => a.id === action.payload.id ? { ...a, status: action.payload.status } : a) };
     case 'SET_OTP_DIGITS': return { ...state, otpDigits: action.payload };

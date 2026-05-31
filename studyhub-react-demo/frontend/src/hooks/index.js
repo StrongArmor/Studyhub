@@ -184,7 +184,19 @@ export function useTutorForm() {
     const subjects = tutorForm.subjects.includes(subject) ? tutorForm.subjects.filter((s) => s !== subject) : [...tutorForm.subjects, subject];
     dispatch({ type: 'SET_TUTOR_FORM', payload: { subjects } });
   };
-  const submit = () => { if (!tutorForm.name || !tutorForm.email) return showToast('Vui lòng nhập họ tên và email', 'error'); if (!tutorForm.subjects.length) return showToast('Vui lòng chọn ít nhất 1 môn học', 'error'); dispatch({ type: 'ADD_APPLICATION', payload: { ...tutorForm, id: Date.now(), createdAt: new Date().toISOString(), status: 'pending' } }); dispatch({ type: 'RESET_TUTOR_FORM' }); showToast('🎉 Đăng ký thành công! Chúng tôi sẽ liên hệ trong 24h.', 'success'); setTimeout(() => navigate('home'), 1500); };
+  const submit = async () => { 
+    if (!tutorForm.name || !tutorForm.email) return showToast('Vui lòng nhập họ tên và email', 'error'); 
+    if (!tutorForm.subjects.length) return showToast('Vui lòng chọn ít nhất 1 môn học', 'error'); 
+    try {
+      const data = await api.createApplication(tutorForm);
+      dispatch({ type: 'ADD_APPLICATION', payload: data.application }); 
+      dispatch({ type: 'RESET_TUTOR_FORM' }); 
+      showToast('🎉 Đăng ký thành công! Chúng tôi sẽ liên hệ trong 24h.', 'success'); 
+      setTimeout(() => navigate('home'), 1500); 
+    } catch (err) {
+      showToast(err.message || 'Có lỗi xảy ra', 'error');
+    }
+  };
   return { tutorForm, setField, toggleSubject, submit };
 }
 

@@ -32,4 +32,7 @@ export const api = {
   updateMe:           (data)                   => req('PATCH', '/users/me',          data),
   updateTutorProfile: (data)                   => req('PATCH', '/tutor/profile',     data),
   createBooking:      (data)                   => req('POST', '/bookings',           data),
+  createApplication:  (data)                   => req('POST', '/applications',       data),
+  getApplications:    ()                       => req('GET',  '/admin/applications'),
+  patchApplication:   (id, status)             => req('PATCH', `/admin/applications/${id}`, { status }),
 };

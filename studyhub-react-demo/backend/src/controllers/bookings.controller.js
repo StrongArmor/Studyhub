@@ -43,7 +43,7 @@ export const createBooking = async (req, res) => {
   let resolvedTutorInitials = body.tutorInitials || null;
   let resolvedTutorColor = body.tutorColor || null;
   if (Number.isFinite(tutorId)) {
-    const u = (await query('SELECT name FROM users WHERE id = $1', [tutorId])).rows[0];
+    const u = (await query("SELECT name FROM users WHERE id = $1 AND role = 'tutor'", [tutorId])).rows[0];
     if (u) resolvedTutorName = u.name;
   }
   if (!resolvedTutorInitials) resolvedTutorInitials = resolvedTutorName ? resolvedTutorName.split(' ').map((p) => p[0]).join('').slice(0, 3).toUpperCase() : 'TUT';
