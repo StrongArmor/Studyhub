@@ -31,6 +31,7 @@ import { insertActivity as addActivity, getActivities as serviceGetActivities } 
 import {
   createBooking,
   cancelBooking,
+  completeBooking,
   addReview
 } from '../controllers/bookings.controller.js';
 import { createReport } from '../controllers/reports.controller.js';
@@ -184,6 +185,8 @@ router.get('/bookings', wrap(async (_req, res) => {
 router.post('/bookings', authenticate, wrap(createBooking));
 
 router.patch('/bookings/:id/cancel', authenticate, wrap(cancelBooking));
+
+router.patch('/bookings/:id/complete', authenticate, wrap(completeBooking));
 
 router.post('/bookings/:id/reviews', authenticate, wrap(addReview));
 

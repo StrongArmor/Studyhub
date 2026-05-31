@@ -1,6 +1,7 @@
 import { useApp } from '../../store/AppContext';
 import { Navbar, Footer } from '../common';
 import { useBooking } from '../../hooks';
+import { api } from '../../services/api';
 
 const STAGES = {
   detail: { title: 'Chi tiết ca - Chưa tới giờ', icon: '🕒', status: 'Chưa tới giờ', desc: 'Demo theo luồng BOOKING của Figma.' },
@@ -26,11 +27,19 @@ export function BookingFlowPage() {
   const handleOpenMeet = () => {
     const popup = window.open(state.session.room, '_blank');
     if (popup) {
-      const timer = setInterval(() => {
+      const timer = setInterval(async () => {
         if (popup.closed) {
           clearInterval(timer);
           dispatch({ type: 'SET_BOOKING_STAGE', payload: 'ended' });
-          openReviewModal(state.session.tutor);
+          if (state.session.id) {
+            try {
+              await api.completeBooking(state.session.id);
+              dispatch({ type: 'COMPLETE_BOOKING_IN_STATE', payload: state.session.id });
+            } catch (err) {
+              console.error('Lỗi khi chuyển trạng thái buổi học sang completed:', err);
+            }
+          }
+          openReviewModal(state.session.tutor, state.session.id);
         }
       }, 1000);
     } else {

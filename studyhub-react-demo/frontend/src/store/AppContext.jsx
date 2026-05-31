@@ -80,7 +80,7 @@ const initialState = {
     declineCount: 0
   },
   applications: [],
-  session: { tutor: 'Nguyễn Minh Anh', student: 'Học viên Demo', subject: 'Toán học', room: 'https://meet.google.com/vvk-fuco-zpo', time: '19:00 - 19:45' },
+  session: { id: null, tutor: 'Nguyễn Minh Anh', student: 'Học viên Demo', subject: 'Toán học', room: 'https://meet.google.com/vvk-fuco-zpo', time: '19:00 - 19:45' },
   bookingStage: 'detail',
   otpDigits: ['','','','','',''],
   otpTimer: '04:59',
@@ -107,6 +107,7 @@ function reducer(state, action) {
     case 'SET_REPORT_MODAL': return { ...state, reportModal: { ...state.reportModal, ...action.payload } };
     case 'ADD_BOOKING': return { ...state, bookings: [action.payload, ...state.bookings] };
     case 'CANCEL_BOOKING': return { ...state, bookings: state.bookings.filter(b => b.id !== action.payload) };
+    case 'COMPLETE_BOOKING_IN_STATE': return { ...state, bookings: state.bookings.map(b => b.id === action.payload ? { ...b, status: 'completed' } : b) };
     case 'ADD_REPORT': return { ...state, reports: [action.payload, ...state.reports] };
     case 'SET_REPORTS': return { ...state, reports: action.payload };
     case 'UPDATE_REPORT_STATUS': return { ...state, reports: state.reports.map((r) => r.id === action.payload.id ? { ...r, status: action.payload.status } : r) };

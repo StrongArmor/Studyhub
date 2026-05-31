@@ -100,6 +100,18 @@ export const cancelBooking = async (req, res) => {
   sendSuccess(res, { booking }, 'Hủy lịch học thành công');
 };
 
+export const completeBooking = async (req, res) => {
+  const updated = (await query('UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *', ['completed', Number(req.params.id)])).rows[0];
+  if (!updated) {
+    sendError(res, 404, 'Không tìm thấy booking');
+    return;
+  }
+
+  const booking = mapBooking(updated);
+  await addActivity('booking', 'Lịch học hoàn thành', `${booking.tutorName} - ${booking.subject}`);
+  sendSuccess(res, { booking }, 'Hoàn thành lịch học');
+};
+
 export const addReview = async (req, res) => {
   const existing = (await query('SELECT * FROM bookings WHERE id = $1', [Number(req.params.id)])).rows[0];
   if (!existing) {

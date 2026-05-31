@@ -152,9 +152,29 @@ export function useBooking() {
       showToast(err.message || 'Có lỗi xảy ra khi đặt lịch', 'error');
     }
   };
-  const cancelBooking = (id) => { dispatch({ type: 'CANCEL_BOOKING', payload: id }); showToast('Đã hủy buổi học thành công', 'success'); };
-  const openReviewModal = (tutorName) => dispatch({ type: 'SET_REVIEW_MODAL', payload: { open: true, tutorName, rating: '5', comment: '' } });
-  const submitReview = () => { const { reviewModal } = state; if (!reviewModal.comment.trim()) return showToast('Vui lòng nhập nhận xét', 'error'); dispatch({ type: 'SET_REVIEW_MODAL', payload: { open: false, tutorName: '', rating: '5', comment: '' } }); showToast('Đã gửi đánh giá thành công! Cảm ơn bạn.', 'success'); };
+  const cancelBooking = async (id) => {
+    try {
+      await api.cancelBooking(id);
+      dispatch({ type: 'CANCEL_BOOKING', payload: id });
+      showToast('Đã hủy buổi học thành công', 'success');
+    } catch (err) {
+      showToast(err.message || 'Hủy buổi học thất bại', 'error');
+    }
+  };
+  const openReviewModal = (tutorName, bookingId = null) => dispatch({ type: 'SET_REVIEW_MODAL', payload: { open: true, tutorName, bookingId, rating: '5', comment: '' } });
+  const submitReview = async () => {
+    const { reviewModal } = state;
+    if (!reviewModal.comment.trim()) return showToast('Vui lòng nhập nhận xét', 'error');
+    try {
+      if (reviewModal.bookingId) {
+        await api.addReview(reviewModal.bookingId, reviewModal.rating, reviewModal.comment);
+      }
+      dispatch({ type: 'SET_REVIEW_MODAL', payload: { open: false, tutorName: '', bookingId: null, rating: '5', comment: '' } });
+      showToast('Đã gửi đánh giá thành công! Cảm ơn bạn.', 'success');
+    } catch (err) {
+      showToast(err.message || 'Gửi đánh giá thất bại', 'error');
+    }
+  };
   const openReportModal = (booking) => dispatch({ type: 'SET_REPORT_MODAL', payload: { open: true, bookingId: booking.id, tutorName: booking.tutorName, issue: 'quality', detail: '' } });
   const submitReport = () => {
     const { reportModal, currentUser } = state;
