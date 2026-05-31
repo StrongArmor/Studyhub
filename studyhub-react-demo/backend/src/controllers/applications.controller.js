@@ -4,6 +4,7 @@ import { insertActivity as addActivity } from '../services/activity.service.js';
 import { createTutor, getTutorByUserId } from '../services/tutors.service.js';
 import { db } from '../config/db.js';
 import { sendError, sendSuccess } from '../utils/responses.js';
+import bcrypt from 'bcryptjs';
 
 const query = (text, params = []) => db.query(text, params);
 
@@ -17,12 +18,17 @@ const buildInitials = (name) => String(name || '')
   .toUpperCase() || 'TUT';
 
 const promoteApplicationToTutor = async (application) => {
-  const userId = application.userId || (await query('SELECT id FROM users WHERE email = $1 LIMIT 1', [application.email])).rows[0]?.id || null;
+  let userId = application.userId || (await query('SELECT id FROM users WHERE email = $1 LIMIT 1', [application.email])).rows[0]?.id || null;
   if (!userId) {
-    throw new Error('Không tìm thấy tài khoản người dùng để chuyển sang gia sư');
+    const hashedPassword = await bcrypt.hash('123456', 10);
+    const userRow = await query(
+      'INSERT INTO users (name, email, password, role, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+      [application.name, application.email, hashedPassword, 'tutor', new Date().toISOString()]
+    );
+    userId = userRow.rows[0].id;
+  } else {
+    await query('UPDATE users SET role = $1 WHERE id = $2', ['tutor', userId]);
   }
-
-  await query('UPDATE users SET role = $1 WHERE id = $2', ['tutor', userId]);
 
   const existingTutor = await getTutorByUserId(userId);
   const tutorRow = existingTutor || await createTutor({

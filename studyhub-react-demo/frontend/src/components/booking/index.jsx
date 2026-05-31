@@ -14,7 +14,7 @@ const STAGES = {
 
 export function BookingFlowPage() {
   const { state, dispatch } = useApp();
-  const { openBookingModal } = useBooking();
+  const { openBookingModal, openReviewModal } = useBooking();
   const stage = STAGES[state.bookingStage] || STAGES.detail;
 
   const nextStage = () => {
@@ -23,7 +23,22 @@ export function BookingFlowPage() {
     dispatch({ type: 'SET_BOOKING_STAGE', payload: order[(idx + 1) % order.length] });
   };
 
-  return <><Navbar active="role-select" /><div className="page-container"><div className="page-header"><h1>Online Learn</h1><p>{stage.title}</p></div><div className="learn-layout"><div className="learn-panel"><div className="status-banner">{stage.status}</div><h2>{state.session.subject}</h2><div className="muted">Gia sư: {state.session.tutor}</div><div className="muted">Học viên: {state.session.student}</div><div className="muted">{state.session.time}</div><div className="booking-card" style={{ marginTop: 16 }}><strong>Link phòng học</strong><div className="muted">{state.session.room}</div></div><div className="row-actions" style={{ marginTop: 16 }}><button className="btn btn-primary" onClick={nextStage}>{state.bookingStage === 'detail' ? 'Vào phòng học' : 'Tiếp theo'}</button><button className="btn btn-outline" onClick={() => dispatch({ type: 'SET_PAGE', payload: 'dashboard' })}>Về dashboard</button></div></div><div className="lesson-stage"><div className="lesson-header"><strong>{stage.title}</strong><span className="status-pill pending">{stage.status}</span></div><div className="lesson-visual">{stage.icon}</div><div className="muted">{stage.desc}</div><div className="row-actions"><button className="btn btn-primary" onClick={nextStage}>Tiếp theo</button><button className="btn btn-outline" onClick={() => window.open(state.session.room, '_blank', 'noopener,noreferrer')}>Mở Meet</button></div></div></div></div><Footer /></>;
+  const handleOpenMeet = () => {
+    const popup = window.open(state.session.room, '_blank');
+    if (popup) {
+      const timer = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(timer);
+          dispatch({ type: 'SET_BOOKING_STAGE', payload: 'ended' });
+          openReviewModal(state.session.tutor);
+        }
+      }, 1000);
+    } else {
+      window.open(state.session.room, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  return <><Navbar active="role-select" /><div className="page-container"><div className="page-header"><h1>Online Learn</h1><p>{stage.title}</p></div><div className="learn-layout"><div className="learn-panel"><div className="status-banner">{stage.status}</div><h2>{state.session.subject}</h2><div className="muted">Gia sư: {state.session.tutor}</div><div className="muted">Học viên: {state.session.student}</div><div className="muted">{state.session.time}</div><div className="booking-card" style={{ marginTop: 16 }}><strong>Link phòng học</strong><div className="muted">{state.session.room}</div></div><div className="row-actions" style={{ marginTop: 16 }}><button className="btn btn-primary" onClick={nextStage}>{state.bookingStage === 'detail' ? 'Vào phòng học' : 'Tiếp theo'}</button><button className="btn btn-outline" onClick={() => dispatch({ type: 'SET_PAGE', payload: 'dashboard' })}>Về dashboard</button></div></div><div className="lesson-stage"><div className="lesson-header"><strong>{stage.title}</strong><span className="status-pill pending">{stage.status}</span></div><div className="lesson-visual">{stage.icon}</div><div className="muted">{stage.desc}</div><div className="row-actions"><button className="btn btn-primary" onClick={nextStage}>Tiếp theo</button><button className="btn btn-outline" onClick={handleOpenMeet}>Mở Meet</button></div></div></div></div><Footer /></>;
 }
 
 export function BookingStepCard() { return null; }
