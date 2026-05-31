@@ -8,3 +8,12 @@
 node_modules
 dist
 *log
+/clientsecret
+/studyhub-react-demo/ENABLE_CALENDAR_API.md
+/studyhub-react-demo/GOOGLE_MEET_FIX.md
+/studyhub-react-demo/GOOGLE_MEET_SOLUTION.md
+/studyhub-react-demo/QUICK_START.md
+/studyhub-react-demo/REFRESH_TOKEN_ISSUE.md
+/studyhub-react-demo/SETUP_COMPLETE.md
+/studyhub-react-demo/RUN_GUIDE_VI.md
+/studyhub-react-demo/START_GUIDE.html

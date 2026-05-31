@@ -34,14 +34,29 @@ export const createGoogleMeetEvent = async ({ summary, description, startDateTim
         conferenceSolutionKey: { type: 'hangoutsMeet' },
       },
     },
-    attendees: attendees.map((email) => ({ email })),
+    // Không yêu cầu attendees - ai có link cũng vào được
+    guestCanModify: false,
+    guestCanInviteOthers: true,
+    guestCanSeeOtherGuests: true,
   };
+
+  // Thêm attendees nếu có, nhưng không bắt buộc
+  if (attendees && attendees.length > 0) {
+    event.attendees = attendees.map((email) => ({ email }));
+  }
 
   const response = await calendar.events.insert({
     calendarId,
     resource: event,
     conferenceDataVersion: 1,
-    sendUpdates: 'all',
+    sendUpdates: attendees && attendees.length > 0 ? 'all' : 'none',
+  });
+
+  // Log để debug
+  console.log('Google Meet Response:', {
+    conferenceData: response.data.conferenceData,
+    hangoutLink: response.data.hangoutLink,
+    eventId: response.data.id,
   });
 
   const meetLink = response.data.conferenceData?.entryPoints?.find((e) => e.entryPointType === 'video')?.uri || response.data.hangoutLink || null;

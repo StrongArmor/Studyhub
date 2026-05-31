@@ -8,7 +8,7 @@ import { seedDatabase } from '../data/seed.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const schemaPath = path.resolve(__dirname, '../database/schema.sql');
-const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || 'postgresql://postgres:postgres@localhost:5432/studyhub';
+const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || 'postgresql://postgres:postgres@localhost:5433/studyhub';
 
 const buildPoolConfig = (url) => {
   const parsedUrl = new URL(url);

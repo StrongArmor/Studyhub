@@ -52,10 +52,22 @@ export const createBooking = async (req, res) => {
   let meetLink = generateFallbackMeetLink();
   if (isGoogleMeetConfigured()) {
     try {
+      // Format datetime đúng: YYYY-MM-DDTHH:MM:SS (Google Calendar sẽ apply timezone từ env)
       const startDT = `${date}T${time}:00`;
-      const endDate = new Date(startDT);
-      endDate.setMinutes(endDate.getMinutes() + duration);
-      const endDT = endDate.toISOString().replace('Z', '');
+
+      // Tính end time bằng cách parse date string + thêm duration
+      const [year, month, day] = date.split('-').map(Number);
+      const [hours, minutes] = time.split(':').map(Number);
+
+      const startDate = new Date(year, month - 1, day, hours, minutes, 0);
+      const endDate = new Date(startDate.getTime() + duration * 60000); // duration in minutes
+
+      const endDT = endDate.getFullYear() + '-' +
+                    String(endDate.getMonth() + 1).padStart(2, '0') + '-' +
+                    String(endDate.getDate()).padStart(2, '0') + 'T' +
+                    String(endDate.getHours()).padStart(2, '0') + ':' +
+                    String(endDate.getMinutes()).padStart(2, '0') + ':00';
+
       const meetResult = await createGoogleMeetEvent({
         summary: `StudyHub: ${subject} - ${resolvedTutorName}`,
         description: `Buổi học ${subject} giữa gia sư ${resolvedTutorName} và học viên.`,
@@ -65,6 +77,7 @@ export const createBooking = async (req, res) => {
       if (meetResult?.meetLink) meetLink = meetResult.meetLink;
     } catch (_err) {
       // fallback link already set
+      console.error('Error creating Google Meet:', _err.message);
     }
   }
 
