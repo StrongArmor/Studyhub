@@ -22,8 +22,8 @@ const promoteApplicationToTutor = async (application) => {
   if (!userId) {
     const hashedPassword = await bcrypt.hash('123456', 10);
     const userRow = await query(
-      'INSERT INTO users (name, email, password, role, created_at) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-      [application.name, application.email, hashedPassword, 'tutor', new Date().toISOString()]
+      'INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id',
+      [application.name, application.email, hashedPassword, 'tutor']
     );
     userId = userRow.rows[0].id;
   } else {
